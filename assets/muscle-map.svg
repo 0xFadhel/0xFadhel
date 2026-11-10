@@ -1,227 +1,117 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" width="960" height="640">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0%" stop-color="#0d1117"/>
-      <stop offset="100%" stop-color="#161b22"/>
-    </linearGradient>
-  </defs>
-
-  <!-- Background -->
-  <rect width="960" height="640" rx="16" fill="url(#bg)"/>
-  <rect x="1" y="1" width="958" height="638" rx="16" fill="none" stroke="#21262d" stroke-width="1"/>
-
-  <!-- Title -->
-  <text x="480" y="38" text-anchor="middle" fill="#e6edf3" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="bold" letter-spacing="2">MUSCLE GROUPS</text>
-  <text x="480" y="56" text-anchor="middle" fill="#484f58" font-family="Segoe UI, Arial, sans-serif" font-size="11">musclewiki.com</text>
-
-  <!-- Divider -->
-  <line x1="480" y1="72" x2="480" y2="558" stroke="#21262d" stroke-width="1" stroke-dasharray="4 4"/>
-
-  <!-- View labels -->
-  <text x="220" y="84" text-anchor="middle" fill="#484f58" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="3">FRONT</text>
-  <text x="720" y="84" text-anchor="middle" fill="#484f58" font-family="Segoe UI, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="3">BACK</text>
-
-  <!-- ===== FRONT VIEW ===== -->
-  <g transform="translate(220, 320)">
-    <!-- Base body (neutral) -->
-    <rect x="-48" y="-161" width="96" height="100" rx="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-72" y="-148" width="20" height="55" rx="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="52" y="-148" width="20" height="55" rx="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-70" y="-95" width="18" height="52" rx="6" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="52" y="-95" width="18" height="52" rx="6" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-48" y="-62" width="96" height="22" rx="10" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-42" y="-42" width="34" height="78" rx="12" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="8" y="-42" width="34" height="78" rx="12" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-38" y="38" width="28" height="60" rx="10" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="10" y="38" width="28" height="60" rx="10" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-
-    <!-- Muscle overlays -->
-    <!-- Shoulders -->
-    <ellipse cx="-52" cy="-155" rx="16" ry="13" fill="#ef4444" opacity="0.85"/>
-    <ellipse cx="52" cy="-155" rx="16" ry="13" fill="#ef4444" opacity="0.85"/>
-    <!-- Chest -->
-    <rect x="-42" y="-161" width="84" height="48" rx="8" fill="#3b82f6" opacity="0.85"/>
-    <!-- Biceps -->
-    <rect x="-72" y="-148" width="20" height="50" rx="8" fill="#f59e0b" opacity="0.85"/>
-    <rect x="52" y="-148" width="20" height="50" rx="8" fill="#f59e0b" opacity="0.85"/>
-    <!-- Forearms -->
-    <rect x="-70" y="-95" width="18" height="48" rx="6" fill="#84cc16" opacity="0.85"/>
-    <rect x="52" y="-95" width="18" height="48" rx="6" fill="#84cc16" opacity="0.85"/>
-    <!-- Obliques -->
-    <rect x="-42" y="-110" width="14" height="42" rx="4" fill="#ec4899" opacity="0.75"/>
-    <rect x="28" y="-110" width="14" height="42" rx="4" fill="#ec4899" opacity="0.75"/>
-    <!-- Abs -->
-    <rect x="-28" y="-110" width="56" height="48" rx="6" fill="#a855f7" opacity="0.85"/>
-    <!-- Quads -->
-    <rect x="-42" y="-42" width="34" height="72" rx="12" fill="#06b6d4" opacity="0.85"/>
-    <rect x="8" y="-42" width="34" height="72" rx="12" fill="#06b6d4" opacity="0.85"/>
-    <!-- Calves -->
-    <rect x="-38" y="38" width="28" height="55" rx="10" fill="#22c55e" opacity="0.85"/>
-    <rect x="10" y="38" width="28" height="55" rx="10" fill="#22c55e" opacity="0.85"/>
-
-    <!-- Head, hands, feet -->
-    <circle cx="0" cy="-195" r="22" fill="#1c2128" stroke="#30363d" stroke-width="1.5"/>
-    <rect x="-8" y="-175" width="16" height="14" rx="4" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <circle cx="-62" cy="-38" r="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <circle cx="62" cy="-38" r="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <ellipse cx="-24" cy="105" rx="14" ry="7" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <ellipse cx="24" cy="105" rx="14" ry="7" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
+  <rect width="960" height="640" rx="16" fill="#0d1117"/>
+  <rect x="0.5" y="0.5" width="959" height="639" rx="16" fill="none" stroke="#21262d"/>
+  <text x="480" y="40" text-anchor="middle" fill="#e6edf3" font-family="Segoe UI, Arial, sans-serif" font-size="22" font-weight="bold" letter-spacing="2">MUSCLE GROUPS</text>
+  <line x1="480" y1="70" x2="480" y2="556" stroke="#21262d" stroke-dasharray="4 4"/>
+  <svg x="40" y="58" width="430" height="509" viewBox="-150 -222 300 355">
+    <text x="0" y="-210" text-anchor="middle" fill="#6b6b6b" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="2">FRONT</text>
+    <g fill="#1c2128">
+    <path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37"></path><path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37" transform="scale(-1,1)"></path>
+    <rect x="-1.5" y="-172" width="3" height="134"></rect>
   </g>
-
-  <!-- ===== BACK VIEW ===== -->
-  <g transform="translate(720, 320)">
-    <!-- Base body (neutral) -->
-    <rect x="-48" y="-161" width="96" height="100" rx="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-72" y="-148" width="20" height="55" rx="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="52" y="-148" width="20" height="55" rx="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-70" y="-95" width="18" height="52" rx="6" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="52" y="-95" width="18" height="52" rx="6" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-48" y="-62" width="96" height="22" rx="10" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-42" y="-42" width="34" height="78" rx="12" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="8" y="-42" width="34" height="78" rx="12" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="-38" y="38" width="28" height="60" rx="10" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <rect x="10" y="38" width="28" height="60" rx="10" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-
-    <!-- Muscle overlays -->
-    <!-- Traps -->
-    <path d="M-12,-175 L12,-175 L48,-155 L48,-145 L-48,-145 L-48,-155 Z" fill="#d946ef" opacity="0.85"/>
-    <!-- Rear Delts -->
-    <ellipse cx="-52" cy="-148" rx="16" ry="13" fill="#ef4444" opacity="0.85"/>
-    <ellipse cx="52" cy="-148" rx="16" ry="13" fill="#ef4444" opacity="0.85"/>
-    <!-- Lats -->
-    <rect x="-48" y="-148" width="28" height="58" rx="4" fill="#6366f1" opacity="0.85"/>
-    <rect x="20" y="-148" width="28" height="58" rx="4" fill="#6366f1" opacity="0.85"/>
-    <!-- Spine (neutral gap) -->
-    <rect x="-20" y="-148" width="40" height="40" rx="4" fill="#1c2128"/>
-    <!-- Lower Back -->
-    <rect x="-30" y="-95" width="60" height="35" rx="6" fill="#fb923c" opacity="0.85"/>
-    <!-- Triceps -->
-    <rect x="-72" y="-148" width="20" height="50" rx="8" fill="#f97316" opacity="0.85"/>
-    <rect x="52" y="-148" width="20" height="50" rx="8" fill="#f97316" opacity="0.85"/>
-    <!-- Forearms -->
-    <rect x="-70" y="-95" width="18" height="48" rx="6" fill="#84cc16" opacity="0.85"/>
-    <rect x="52" y="-95" width="18" height="48" rx="6" fill="#84cc16" opacity="0.85"/>
-    <!-- Glutes -->
-    <ellipse cx="-22" cy="-48" rx="20" ry="16" fill="#f43f5e" opacity="0.85"/>
-    <ellipse cx="22" cy="-48" rx="20" ry="16" fill="#f43f5e" opacity="0.85"/>
-    <!-- Hamstrings -->
-    <rect x="-42" y="-32" width="34" height="68" rx="12" fill="#14b8a6" opacity="0.85"/>
-    <rect x="8" y="-32" width="34" height="68" rx="12" fill="#14b8a6" opacity="0.85"/>
-    <!-- Calves -->
-    <rect x="-38" y="38" width="28" height="55" rx="10" fill="#22c55e" opacity="0.85"/>
-    <rect x="10" y="38" width="28" height="55" rx="10" fill="#22c55e" opacity="0.85"/>
-
-    <!-- Head, hands, feet -->
-    <circle cx="0" cy="-195" r="22" fill="#1c2128" stroke="#30363d" stroke-width="1.5"/>
-    <rect x="-8" y="-175" width="16" height="14" rx="4" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <circle cx="-62" cy="-38" r="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <circle cx="62" cy="-38" r="8" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <ellipse cx="-24" cy="105" rx="14" ry="7" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
-    <ellipse cx="24" cy="105" rx="14" ry="7" fill="#1c2128" stroke="#30363d" stroke-width="1"/>
+    <g data-muscle="shoulders" fill="#ef4444" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M40,-146 C51,-145 59,-138 60,-126 C60,-119 58,-113 55,-108 C51,-115 46,-123 43,-130 C41,-136 40,-142 40,-146 Z"></path><path d="M40,-146 C51,-145 59,-138 60,-126 C60,-119 58,-113 55,-108 C51,-115 46,-123 43,-130 C41,-136 40,-142 40,-146 Z" transform="scale(-1,1)"></path></g><g data-muscle="chest" fill="#3b82f6" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M2,-144 C14,-147 28,-147 38,-143 C40,-136 41,-129 41,-123 C38,-114 26,-110 14,-111 C8,-112 4,-114 2,-116 Z"></path><path d="M2,-144 C14,-147 28,-147 38,-143 C40,-136 41,-129 41,-123 C38,-114 26,-110 14,-111 C8,-112 4,-114 2,-116 Z" transform="scale(-1,1)"></path></g><g data-muscle="biceps" fill="#f59e0b" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M47,-116 C50,-110 53,-106 56,-104 C59,-104 61,-105 62,-106 C63,-100 64,-96 65,-91 C61,-88 56,-88 52,-90 C50,-98 48,-108 47,-116 Z"></path><path d="M47,-116 C50,-110 53,-106 56,-104 C59,-104 61,-105 62,-106 C63,-100 64,-96 65,-91 C61,-88 56,-88 52,-90 C50,-98 48,-108 47,-116 Z" transform="scale(-1,1)"></path></g><g data-muscle="forearms" fill="#84cc16" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M53,-86 C57,-84 62,-84 66,-88 C69,-76 71,-60 71.5,-44 C68,-42 65,-42 63,-44 C60,-58 57,-72 53,-86 Z"></path><path d="M53,-86 C57,-84 62,-84 66,-88 C69,-76 71,-60 71.5,-44 C68,-42 65,-42 63,-44 C60,-58 57,-72 53,-86 Z" transform="scale(-1,1)"></path></g><g data-muscle="obliques" fill="#ec4899" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M16,-106 C26,-106 34,-109 40,-114 C40,-104 38,-96 36,-88 C33,-78 32,-70 33,-62 C34,-56 35,-52 36,-48 C30,-48 22,-50 16,-56 Z"></path><path d="M16,-106 C26,-106 34,-109 40,-114 C40,-104 38,-96 36,-88 C33,-78 32,-70 33,-62 C34,-56 35,-52 36,-48 C30,-48 22,-50 16,-56 Z" transform="scale(-1,1)"></path></g><g data-muscle="abs" fill="#a855f7" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M4.5,-108 H10.5 Q13.5,-108 13.5,-105 V-98 Q13.5,-95 10.5,-95 H4.5 Q1.5,-95 1.5,-98 V-105 Q1.5,-108 4.5,-108 Z"></path><path d="M4.5,-108 H10.5 Q13.5,-108 13.5,-105 V-98 Q13.5,-95 10.5,-95 H4.5 Q1.5,-95 1.5,-98 V-105 Q1.5,-108 4.5,-108 Z" transform="scale(-1,1)"></path><path d="M4.5,-93.5 H10.5 Q13.5,-93.5 13.5,-90.5 V-83.5 Q13.5,-80.5 10.5,-80.5 H4.5 Q1.5,-80.5 1.5,-83.5 V-90.5 Q1.5,-93.5 4.5,-93.5 Z"></path><path d="M4.5,-93.5 H10.5 Q13.5,-93.5 13.5,-90.5 V-83.5 Q13.5,-80.5 10.5,-80.5 H4.5 Q1.5,-80.5 1.5,-83.5 V-90.5 Q1.5,-93.5 4.5,-93.5 Z" transform="scale(-1,1)"></path><path d="M4.5,-79 H10.5 Q13.5,-79 13.5,-76 V-69 Q13.5,-66 10.5,-66 H4.5 Q1.5,-66 1.5,-69 V-76 Q1.5,-79 4.5,-79 Z"></path><path d="M4.5,-79 H10.5 Q13.5,-79 13.5,-76 V-69 Q13.5,-66 10.5,-66 H4.5 Q1.5,-66 1.5,-69 V-76 Q1.5,-79 4.5,-79 Z" transform="scale(-1,1)"></path><path d="M1.5,-64.5 L13.5,-64.5 C13.5,-56 9,-48 1.5,-43 Z"></path><path d="M1.5,-64.5 L13.5,-64.5 C13.5,-56 9,-48 1.5,-43 Z" transform="scale(-1,1)"></path></g><g data-muscle="quads" fill="#06b6d4" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M7,-28 C16,-30 28,-36 37,-41 C40,-22 39,0 35,18 C30,25 21,25 16,18 C14,2 11,-14 7,-28 Z"></path><path d="M7,-28 C16,-30 28,-36 37,-41 C40,-22 39,0 35,18 C30,25 21,25 16,18 C14,2 11,-14 7,-28 Z" transform="scale(-1,1)"></path></g><g data-muscle="calves" fill="#22c55e" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M18,44 C24,40 32,42 35,48 C36,62 34.5,80 30,96 C27,98 23,98 20,96 C18,80 17,60 18,44 Z"></path><path d="M18,44 C24,40 32,42 35,48 C36,62 34.5,80 30,96 C27,98 23,98 20,96 C18,80 17,60 18,44 Z" transform="scale(-1,1)"></path></g>
+    <g fill="none" stroke="#444c56" stroke-width="1.2" stroke-linejoin="round">
+    <path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37"></path><path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37" transform="scale(-1,1)"></path>
+    <ellipse cx="0" cy="-184" rx="14" ry="17.5" fill="#1c2128"></ellipse>
   </g>
-
-  <!-- ===== FRONT LABELS ===== -->
-  <g font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="500">
-    <!-- Left side -->
-    <text x="82" y="167" text-anchor="end" fill="#ef4444">Shoulders</text>
-    <line x1="86" y1="165" x2="163" y2="165" stroke="#ef4444" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="163" cy="165" r="2" fill="#ef4444" opacity="0.5"/>
-
-    <text x="82" y="183" text-anchor="end" fill="#3b82f6">Chest</text>
-    <line x1="86" y1="181" x2="175" y2="175" stroke="#3b82f6" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="175" cy="175" r="2" fill="#3b82f6" opacity="0.5"/>
-
-    <text x="82" y="199" text-anchor="end" fill="#f59e0b">Biceps</text>
-    <line x1="86" y1="197" x2="145" y2="192" stroke="#f59e0b" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="145" cy="192" r="2" fill="#f59e0b" opacity="0.5"/>
-
-    <text x="82" y="251" text-anchor="end" fill="#84cc16">Forearms</text>
-    <line x1="86" y1="249" x2="148" y2="245" stroke="#84cc16" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="148" cy="245" r="2" fill="#84cc16" opacity="0.5"/>
-
-    <!-- Right side -->
-    <text x="358" y="224" text-anchor="start" fill="#a855f7">Abs</text>
-    <line x1="354" y1="222" x2="252" y2="222" stroke="#a855f7" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="252" cy="222" r="2" fill="#a855f7" opacity="0.5"/>
-
-    <text x="358" y="242" text-anchor="start" fill="#ec4899">Obliques</text>
-    <line x1="354" y1="240" x2="255" y2="236" stroke="#ec4899" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="255" cy="236" r="2" fill="#ec4899" opacity="0.5"/>
-
-    <text x="358" y="310" text-anchor="start" fill="#06b6d4">Quads</text>
-    <line x1="354" y1="308" x2="258" y2="302" stroke="#06b6d4" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="258" cy="302" r="2" fill="#06b6d4" opacity="0.5"/>
-
-    <text x="358" y="378" text-anchor="start" fill="#22c55e">Calves</text>
-    <line x1="354" y1="376" x2="250" y2="373" stroke="#22c55e" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="250" cy="373" r="2" fill="#22c55e" opacity="0.5"/>
+    <g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-148" text-anchor="end" fill="#ef4444">Shoulders</text>
+    <line x1="-80" y1="-151" x2="-52" y2="-134" stroke="#ef4444" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-52" cy="-134" r="1.8" fill="#ef4444"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-104" text-anchor="end" fill="#f59e0b">Biceps</text>
+    <line x1="-80" y1="-107" x2="-57" y2="-98" stroke="#f59e0b" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-57" cy="-98" r="1.8" fill="#f59e0b"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-62" text-anchor="end" fill="#84cc16">Forearms</text>
+    <line x1="-80" y1="-65" x2="-66" y2="-64" stroke="#84cc16" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-66" cy="-64" r="1.8" fill="#84cc16"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="2" text-anchor="end" fill="#06b6d4">Quads</text>
+    <line x1="-80" y1="-1" x2="-27" y2="-6" stroke="#06b6d4" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-27" cy="-6" r="1.8" fill="#06b6d4"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="-134" text-anchor="start" fill="#3b82f6">Chest</text>
+    <line x1="80" y1="-137" x2="24" y2="-130" stroke="#3b82f6" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="24" cy="-130" r="1.8" fill="#3b82f6"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="-96" text-anchor="start" fill="#ec4899">Obliques</text>
+    <line x1="80" y1="-99" x2="30" y2="-86" stroke="#ec4899" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="30" cy="-86" r="1.8" fill="#ec4899"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="-74" text-anchor="start" fill="#a855f7">Abs</text>
+    <line x1="80" y1="-77" x2="8" y2="-72" stroke="#a855f7" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="8" cy="-72" r="1.8" fill="#a855f7"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="70" text-anchor="start" fill="#22c55e">Calves</text>
+    <line x1="80" y1="67" x2="30" y2="68" stroke="#22c55e" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="30" cy="68" r="1.8" fill="#22c55e"></circle>
   </g>
-
-  <!-- ===== BACK LABELS ===== -->
-  <g font-family="Segoe UI, Arial, sans-serif" font-size="11" font-weight="500">
-    <!-- Left side -->
-    <text x="582" y="150" text-anchor="end" fill="#d946ef">Traps</text>
-    <line x1="586" y1="148" x2="670" y2="148" stroke="#d946ef" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="670" cy="148" r="2" fill="#d946ef" opacity="0.5"/>
-
-    <text x="582" y="175" text-anchor="end" fill="#f97316">Triceps</text>
-    <line x1="586" y1="173" x2="645" y2="178" stroke="#f97316" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="645" cy="178" r="2" fill="#f97316" opacity="0.5"/>
-
-    <text x="582" y="200" text-anchor="end" fill="#6366f1">Lats</text>
-    <line x1="586" y1="198" x2="668" y2="198" stroke="#6366f1" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="668" cy="198" r="2" fill="#6366f1" opacity="0.5"/>
-
-    <text x="582" y="240" text-anchor="end" fill="#fb923c">Lower Back</text>
-    <line x1="586" y1="238" x2="688" y2="238" stroke="#fb923c" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="688" cy="238" r="2" fill="#fb923c" opacity="0.5"/>
-
-    <!-- Right side -->
-    <text x="858" y="272" text-anchor="start" fill="#f43f5e">Glutes</text>
-    <line x1="854" y1="270" x2="748" y2="272" stroke="#f43f5e" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="748" cy="272" r="2" fill="#f43f5e" opacity="0.5"/>
-
-    <text x="858" y="312" text-anchor="start" fill="#14b8a6">Hamstrings</text>
-    <line x1="854" y1="310" x2="762" y2="310" stroke="#14b8a6" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="762" cy="310" r="2" fill="#14b8a6" opacity="0.5"/>
-
-    <text x="858" y="378" text-anchor="start" fill="#22c55e">Calves</text>
-    <line x1="854" y1="376" x2="752" y2="373" stroke="#22c55e" stroke-width="0.8" opacity="0.5"/>
-    <circle cx="752" cy="373" r="2" fill="#22c55e" opacity="0.5"/>
+  </svg>
+  <svg x="490" y="58" width="430" height="509" viewBox="-150 -222 300 355">
+    <text x="0" y="-210" text-anchor="middle" fill="#6b6b6b" font-family="Segoe UI, Arial, sans-serif" font-size="9" font-weight="600" letter-spacing="2">BACK</text>
+    <g fill="#1c2128">
+    <path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37"></path><path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37" transform="scale(-1,1)"></path>
+    <rect x="-1.5" y="-172" width="3" height="134"></rect>
   </g>
-
-  <!-- ===== LEGEND ===== -->
-  <rect x="20" y="572" width="920" height="50" rx="8" fill="#161b22" stroke="#21262d" stroke-width="1"/>
-  <g font-family="Segoe UI, Arial, sans-serif" font-size="9.5" fill="#8b949e">
-    <!-- Row 1 -->
-    <rect x="38" y="582" width="10" height="10" rx="2" fill="#3b82f6"/>
-    <text x="52" y="591">Chest</text>
-    <rect x="100" y="582" width="10" height="10" rx="2" fill="#ef4444"/>
-    <text x="114" y="591">Shoulders</text>
-    <rect x="185" y="582" width="10" height="10" rx="2" fill="#f59e0b"/>
-    <text x="199" y="591">Biceps</text>
-    <rect x="255" y="582" width="10" height="10" rx="2" fill="#f97316"/>
-    <text x="269" y="591">Triceps</text>
-    <rect x="330" y="582" width="10" height="10" rx="2" fill="#84cc16"/>
-    <text x="344" y="591">Forearms</text>
-    <rect x="415" y="582" width="10" height="10" rx="2" fill="#a855f7"/>
-    <text x="429" y="591">Abs</text>
-    <rect x="462" y="582" width="10" height="10" rx="2" fill="#ec4899"/>
-    <text x="476" y="591">Obliques</text>
-    <!-- Row 2 -->
-    <rect x="38" y="600" width="10" height="10" rx="2" fill="#6366f1"/>
-    <text x="52" y="609">Lats</text>
-    <rect x="100" y="600" width="10" height="10" rx="2" fill="#d946ef"/>
-    <text x="114" y="609">Traps</text>
-    <rect x="165" y="600" width="10" height="10" rx="2" fill="#fb923c"/>
-    <text x="179" y="609">Lower Back</text>
-    <rect x="265" y="600" width="10" height="10" rx="2" fill="#f43f5e"/>
-    <text x="279" y="609">Glutes</text>
-    <rect x="338" y="600" width="10" height="10" rx="2" fill="#06b6d4"/>
-    <text x="352" y="609">Quads</text>
-    <rect x="405" y="600" width="10" height="10" rx="2" fill="#14b8a6"/>
-    <text x="419" y="609">Hamstrings</text>
-    <rect x="502" y="600" width="10" height="10" rx="2" fill="#22c55e"/>
-    <text x="516" y="609">Calves</text>
+    <g data-muscle="traps" fill="#d946ef" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M0,-168 L6,-168 C7,-158 11,-154 17,-151 C26,-148.5 32,-148 37,-146.5 C29,-141 20,-134 12,-124 C8,-116 4,-106 0,-98 Z"></path><path d="M0,-168 L6,-168 C7,-158 11,-154 17,-151 C26,-148.5 32,-148 37,-146.5 C29,-141 20,-134 12,-124 C8,-116 4,-106 0,-98 Z" transform="scale(-1,1)"></path></g><g data-muscle="shoulders" fill="#ef4444" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M40,-146 C51,-145 59,-138 60,-126 C60,-119 58,-113 55,-108 C51,-115 46,-123 43,-130 C41,-136 40,-142 40,-146 Z"></path><path d="M40,-146 C51,-145 59,-138 60,-126 C60,-119 58,-113 55,-108 C51,-115 46,-123 43,-130 C41,-136 40,-142 40,-146 Z" transform="scale(-1,1)"></path></g><g data-muscle="lats" fill="#6366f1" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M13,-118 C21,-128 31,-134 41,-129 C43,-123 43,-118 42,-114 C40,-102 38,-94 36,-86 C30,-78 18,-74 8,-74 C8,-88 9,-104 13,-118 Z"></path><path d="M13,-118 C21,-128 31,-134 41,-129 C43,-123 43,-118 42,-114 C40,-102 38,-94 36,-86 C30,-78 18,-74 8,-74 C8,-88 9,-104 13,-118 Z" transform="scale(-1,1)"></path></g><g data-muscle="lowerback" fill="#fb923c" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M1.5,-92 C4,-86 6,-78 7,-70 C18,-70 28,-73 33,-78 C32,-70 33,-62 34,-56 C24,-54 12,-52 1.5,-50 Z"></path><path d="M1.5,-92 C4,-86 6,-78 7,-70 C18,-70 28,-73 33,-78 C32,-70 33,-62 34,-56 C24,-54 12,-52 1.5,-50 Z" transform="scale(-1,1)"></path></g><g data-muscle="triceps" fill="#f97316" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M47,-116 C50,-110 53,-106 56,-104 C59,-104 61,-105 62,-106 C63,-100 64,-96 65,-91 C61,-88 56,-88 52,-90 C50,-98 48,-108 47,-116 Z"></path><path d="M47,-116 C50,-110 53,-106 56,-104 C59,-104 61,-105 62,-106 C63,-100 64,-96 65,-91 C61,-88 56,-88 52,-90 C50,-98 48,-108 47,-116 Z" transform="scale(-1,1)"></path></g><g data-muscle="forearms" fill="#84cc16" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M53,-86 C57,-84 62,-84 66,-88 C69,-76 71,-60 71.5,-44 C68,-42 65,-42 63,-44 C60,-58 57,-72 53,-86 Z"></path><path d="M53,-86 C57,-84 62,-84 66,-88 C69,-76 71,-60 71.5,-44 C68,-42 65,-42 63,-44 C60,-58 57,-72 53,-86 Z" transform="scale(-1,1)"></path></g><g data-muscle="glutes" fill="#f43f5e" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M2,-47 C14,-50 28,-52 35,-50 C38,-42 39,-32 37,-24 C30,-15 16,-16 8,-22 C5,-30 2.5,-38 2,-47 Z"></path><path d="M2,-47 C14,-50 28,-52 35,-50 C38,-42 39,-32 37,-24 C30,-15 16,-16 8,-22 C5,-30 2.5,-38 2,-47 Z" transform="scale(-1,1)"></path></g><g data-muscle="hamstrings" fill="#14b8a6" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M9,-16 C18,-11 30,-11 37,-19 C39,-6 38,8 35,20 C30,25 21,25 16,20 C14,6 12,-6 9,-16 Z"></path><path d="M9,-16 C18,-11 30,-11 37,-19 C39,-6 38,8 35,20 C30,25 21,25 16,20 C14,6 12,-6 9,-16 Z" transform="scale(-1,1)"></path></g><g data-muscle="calves" fill="#22c55e" stroke="#1c2128" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><path d="M18,40 C23,36 32,36 35.5,43 C36.5,52 36,68 32,78 C29,84 27,91 26,98 L23,98 C22,91 20,84 18.5,78 C16.5,66 16.5,52 18,40 Z"></path><path d="M18,40 C23,36 32,36 35.5,43 C36.5,52 36,68 32,78 C29,84 27,91 26,98 L23,98 C22,91 20,84 18.5,78 C16.5,66 16.5,52 18,40 Z" transform="scale(-1,1)"></path></g>
+    <g fill="none" stroke="#444c56" stroke-width="1.2" stroke-linejoin="round">
+    <path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37"></path><path d="M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37" transform="scale(-1,1)"></path>
+    <ellipse cx="0" cy="-184" rx="14" ry="17.5" fill="#1c2128"></ellipse>
+  </g>
+    <g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-156" text-anchor="end" fill="#d946ef">Traps</text>
+    <line x1="-80" y1="-159" x2="-14" y2="-146" stroke="#d946ef" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-14" cy="-146" r="1.8" fill="#d946ef"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-122" text-anchor="end" fill="#6366f1">Lats</text>
+    <line x1="-80" y1="-125" x2="-28" y2="-108" stroke="#6366f1" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-28" cy="-108" r="1.8" fill="#6366f1"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-98" text-anchor="end" fill="#f97316">Triceps</text>
+    <line x1="-80" y1="-101" x2="-57" y2="-98" stroke="#f97316" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-57" cy="-98" r="1.8" fill="#f97316"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="-84" y="-60" text-anchor="end" fill="#fb923c">Lower Back</text>
+    <line x1="-80" y1="-63" x2="-16" y2="-62" stroke="#fb923c" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="-16" cy="-62" r="1.8" fill="#fb923c"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="-148" text-anchor="start" fill="#ef4444">Shoulders</text>
+    <line x1="80" y1="-151" x2="52" y2="-134" stroke="#ef4444" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="52" cy="-134" r="1.8" fill="#ef4444"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="-66" text-anchor="start" fill="#84cc16">Forearms</text>
+    <line x1="80" y1="-69" x2="66" y2="-64" stroke="#84cc16" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="66" cy="-64" r="1.8" fill="#84cc16"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="-30" text-anchor="start" fill="#f43f5e">Glutes</text>
+    <line x1="80" y1="-33" x2="22" y2="-36" stroke="#f43f5e" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="22" cy="-36" r="1.8" fill="#f43f5e"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="6" text-anchor="start" fill="#14b8a6">Hamstrings</text>
+    <line x1="80" y1="3" x2="28" y2="2" stroke="#14b8a6" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="28" cy="2" r="1.8" fill="#14b8a6"></circle>
+  </g><g font-family="Segoe UI, Arial, sans-serif" font-size="10" font-weight="600">
+    <text x="84" y="64" text-anchor="start" fill="#22c55e">Calves</text>
+    <line x1="80" y1="61" x2="30" y2="60" stroke="#22c55e" stroke-width="0.7" opacity="0.55"></line>
+    <circle cx="30" cy="60" r="1.8" fill="#22c55e"></circle>
+  </g>
+  </svg>
+  <rect x="20" y="572" width="920" height="50" rx="8" fill="#161b22" stroke="#21262d"/>
+  <g font-family="Segoe UI, Arial, sans-serif" font-size="10" fill="#8b949e">
+    <rect x="44" y="584" width="10" height="10" rx="2" fill="#3b82f6"/><text x="59" y="593">Chest</text>
+    <rect x="172" y="584" width="10" height="10" rx="2" fill="#ef4444"/><text x="187" y="593">Shoulders</text>
+    <rect x="300" y="584" width="10" height="10" rx="2" fill="#f59e0b"/><text x="315" y="593">Biceps</text>
+    <rect x="428" y="584" width="10" height="10" rx="2" fill="#f97316"/><text x="443" y="593">Triceps</text>
+    <rect x="556" y="584" width="10" height="10" rx="2" fill="#84cc16"/><text x="571" y="593">Forearms</text>
+    <rect x="684" y="584" width="10" height="10" rx="2" fill="#a855f7"/><text x="699" y="593">Abs</text>
+    <rect x="812" y="584" width="10" height="10" rx="2" fill="#ec4899"/><text x="827" y="593">Obliques</text>
+    <rect x="44" y="602" width="10" height="10" rx="2" fill="#6366f1"/><text x="59" y="611">Lats</text>
+    <rect x="172" y="602" width="10" height="10" rx="2" fill="#d946ef"/><text x="187" y="611">Traps</text>
+    <rect x="300" y="602" width="10" height="10" rx="2" fill="#fb923c"/><text x="315" y="611">Lower Back</text>
+    <rect x="428" y="602" width="10" height="10" rx="2" fill="#f43f5e"/><text x="443" y="611">Glutes</text>
+    <rect x="556" y="602" width="10" height="10" rx="2" fill="#06b6d4"/><text x="571" y="611">Quads</text>
+    <rect x="684" y="602" width="10" height="10" rx="2" fill="#14b8a6"/><text x="699" y="611">Hamstrings</text>
+    <rect x="812" y="602" width="10" height="10" rx="2" fill="#22c55e"/><text x="827" y="611">Calves</text>
   </g>
 </svg>

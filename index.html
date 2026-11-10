@@ -12,6 +12,8 @@
     --fg-secondary: #5c5c5c;
     --fg-tertiary: #8a8a8a;
     --accent: #2563eb;
+    --body: #ebe9e3;
+    --body-line: #c4c0b6;
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
     --radius: 14px;
@@ -27,6 +29,8 @@
       --fg-secondary: #a3a3a3;
       --fg-tertiary: #6b6b6b;
       --accent: #3b82f6;
+    --body: #262626;
+    --body-line: #454545;
       color-scheme: dark;
     }
   }
@@ -39,6 +43,8 @@
     --fg-secondary: #a3a3a3;
     --fg-tertiary: #6b6b6b;
     --accent: #3b82f6;
+    --body: #262626;
+    --body-line: #454545;
     color-scheme: dark;
   }
 
@@ -154,6 +160,7 @@
   .muscle-group:hover { opacity: 1 !important; filter: brightness(1.25); }
   .muscle-group.active { opacity: 1 !important; filter: brightness(1.15) drop-shadow(0 0 8px var(--glow-color, #fff)); }
   .muscle-group.dimmed { opacity: 0.3 !important; }
+  .muscle-group:focus-visible { outline: none; opacity: 1 !important; filter: brightness(1.25) drop-shadow(0 0 6px var(--glow-color, #fff)); }
 
   .body-base { pointer-events: none; }
 
@@ -470,137 +477,106 @@ const EXERCISES = {
   ]
 };
 
-// SVG body shapes
-function bodyShape(id, fill, stroke) {
-  return `<g class="body-base">
-    <circle cx="0" cy="-195" r="22" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
-    <rect x="-8" y="-175" width="16" height="14" rx="4" fill="${fill}" stroke="${stroke}"/>
-    <rect x="-48" y="-161" width="96" height="100" rx="8" fill="${fill}" stroke="${stroke}"/>
-    <rect x="-72" y="-148" width="20" height="55" rx="8" fill="${fill}" stroke="${stroke}"/>
-    <rect x="52" y="-148" width="20" height="55" rx="8" fill="${fill}" stroke="${stroke}"/>
-    <rect x="-70" y="-95" width="18" height="52" rx="6" fill="${fill}" stroke="${stroke}"/>
-    <rect x="52" y="-95" width="18" height="52" rx="6" fill="${fill}" stroke="${stroke}"/>
-    <rect x="-48" y="-62" width="96" height="22" rx="10" fill="${fill}" stroke="${stroke}"/>
-    <rect x="-42" y="-42" width="34" height="78" rx="12" fill="${fill}" stroke="${stroke}"/>
-    <rect x="8" y="-42" width="34" height="78" rx="12" fill="${fill}" stroke="${stroke}"/>
-    <rect x="-38" y="38" width="28" height="60" rx="10" fill="${fill}" stroke="${stroke}"/>
-    <rect x="10" y="38" width="28" height="60" rx="10" fill="${fill}" stroke="${stroke}"/>
-    <circle cx="-62" cy="-38" r="8" fill="${fill}" stroke="${stroke}"/>
-    <circle cx="62" cy="-38" r="8" fill="${fill}" stroke="${stroke}"/>
-    <ellipse cx="-24" cy="105" rx="14" ry="7" fill="${fill}" stroke="${stroke}"/>
-    <ellipse cx="24" cy="105" rx="14" ry="7" fill="${fill}" stroke="${stroke}"/>
+// Figure geometry: right half only (x >= 0); every path is mirrored for the left side.
+const ARM_UPPER = 'M47,-116 C50,-110 53,-106 56,-104 C59,-104 61,-105 62,-106 C63,-100 64,-96 65,-91 C61,-88 56,-88 52,-90 C50,-98 48,-108 47,-116 Z';
+const ARM_LOWER = 'M53,-86 C57,-84 62,-84 66,-88 C69,-76 71,-60 71.5,-44 C68,-42 65,-42 63,-44 C60,-58 57,-72 53,-86 Z';
+const DELTOID = 'M40,-146 C51,-145 59,-138 60,-126 C60,-119 58,-113 55,-108 C51,-115 46,-123 43,-130 C41,-136 40,-142 40,-146 Z';
+const FIG = {
+  outline: 'M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37',
+  front: {
+    shoulders: [DELTOID],
+    chest: ['M2,-144 C14,-147 28,-147 38,-143 C40,-136 41,-129 41,-123 C38,-114 26,-110 14,-111 C8,-112 4,-114 2,-116 Z'],
+    biceps: [ARM_UPPER],
+    forearms: [ARM_LOWER],
+    obliques: ['M16,-106 C26,-106 34,-109 40,-114 C40,-104 38,-96 36,-88 C33,-78 32,-70 33,-62 C34,-56 35,-52 36,-48 C30,-48 22,-50 16,-56 Z'],
+    abs: [
+      'M4.5,-108 H10.5 Q13.5,-108 13.5,-105 V-98 Q13.5,-95 10.5,-95 H4.5 Q1.5,-95 1.5,-98 V-105 Q1.5,-108 4.5,-108 Z',
+      'M4.5,-93.5 H10.5 Q13.5,-93.5 13.5,-90.5 V-83.5 Q13.5,-80.5 10.5,-80.5 H4.5 Q1.5,-80.5 1.5,-83.5 V-90.5 Q1.5,-93.5 4.5,-93.5 Z',
+      'M4.5,-79 H10.5 Q13.5,-79 13.5,-76 V-69 Q13.5,-66 10.5,-66 H4.5 Q1.5,-66 1.5,-69 V-76 Q1.5,-79 4.5,-79 Z',
+      'M1.5,-64.5 L13.5,-64.5 C13.5,-56 9,-48 1.5,-43 Z'
+    ],
+    quads: ['M7,-28 C16,-30 28,-36 37,-41 C40,-22 39,0 35,18 C30,25 21,25 16,18 C14,2 11,-14 7,-28 Z'],
+    calves: ['M18,44 C24,40 32,42 35,48 C36,62 34.5,80 30,96 C27,98 23,98 20,96 C18,80 17,60 18,44 Z']
+  },
+  back: {
+    traps: ['M0,-168 L6,-168 C7,-158 11,-154 17,-151 C26,-148.5 32,-148 37,-146.5 C29,-141 20,-134 12,-124 C8,-116 4,-106 0,-98 Z'],
+    shoulders: [DELTOID],
+    lats: ['M13,-118 C21,-128 31,-134 41,-129 C43,-123 43,-118 42,-114 C40,-102 38,-94 36,-86 C30,-78 18,-74 8,-74 C8,-88 9,-104 13,-118 Z'],
+    lowerback: ['M1.5,-92 C4,-86 6,-78 7,-70 C18,-70 28,-73 33,-78 C32,-70 33,-62 34,-56 C24,-54 12,-52 1.5,-50 Z'],
+    triceps: [ARM_UPPER],
+    forearms: [ARM_LOWER],
+    glutes: ['M2,-47 C14,-50 28,-52 35,-50 C38,-42 39,-32 37,-24 C30,-15 16,-16 8,-22 C5,-30 2.5,-38 2,-47 Z'],
+    hamstrings: ['M9,-16 C18,-11 30,-11 37,-19 C39,-6 38,8 35,20 C30,25 21,25 16,20 C14,6 12,-6 9,-16 Z'],
+    calves: ['M18,40 C23,36 32,36 35.5,43 C36.5,52 36,68 32,78 C29,84 27,91 26,98 L23,98 C22,91 20,84 18.5,78 C16.5,66 16.5,52 18,40 Z']
+  }
+};
+
+function mirror(d) {
+  return `<path d="${d}"/><path d="${d}" transform="scale(-1,1)"/>`;
+}
+
+function figureBase(body) {
+  return `<g class="body-base" fill="${body}">
+    ${mirror(FIG.outline)}
+    <rect x="-1.5" y="-172" width="3" height="134"/>
   </g>`;
 }
 
-function muscleShapes(view) {
-  if (view === 'front') return `
-    <g class="muscle-group" data-muscle="shoulders" style="--glow-color:${MUSCLES.shoulders.color}">
-      <ellipse cx="-52" cy="-155" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
-      <ellipse cx="52" cy="-155" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="chest" style="--glow-color:${MUSCLES.chest.color}">
-      <rect x="-42" y="-161" width="84" height="48" rx="8" fill="${MUSCLES.chest.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="biceps" style="--glow-color:${MUSCLES.biceps.color}">
-      <rect x="-72" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.biceps.color}" opacity="0.85"/>
-      <rect x="52" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.biceps.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="forearms" style="--glow-color:${MUSCLES.forearms.color}">
-      <rect x="-70" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
-      <rect x="52" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="obliques" style="--glow-color:${MUSCLES.obliques.color}">
-      <rect x="-42" y="-110" width="14" height="42" rx="4" fill="${MUSCLES.obliques.color}" opacity="0.75"/>
-      <rect x="28" y="-110" width="14" height="42" rx="4" fill="${MUSCLES.obliques.color}" opacity="0.75"/>
-    </g>
-    <g class="muscle-group" data-muscle="abs" style="--glow-color:${MUSCLES.abs.color}">
-      <rect x="-28" y="-110" width="56" height="48" rx="6" fill="${MUSCLES.abs.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="quads" style="--glow-color:${MUSCLES.quads.color}">
-      <rect x="-42" y="-42" width="34" height="72" rx="12" fill="${MUSCLES.quads.color}" opacity="0.85"/>
-      <rect x="8" y="-42" width="34" height="72" rx="12" fill="${MUSCLES.quads.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="calves" style="--glow-color:${MUSCLES.calves.color}">
-      <rect x="-38" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
-      <rect x="10" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
-    </g>`;
+function figureLines(body, line) {
+  return `<g class="body-base" fill="none" stroke="${line}" stroke-width="1.2" stroke-linejoin="round">
+    ${mirror(FIG.outline)}
+    <ellipse cx="0" cy="-184" rx="14" ry="17.5" fill="${body}"/>
+  </g>`;
+}
 
-  return `
-    <g class="muscle-group" data-muscle="traps" style="--glow-color:${MUSCLES.traps.color}">
-      <path d="M-12,-175 L12,-175 L48,-155 L48,-145 L-48,-145 L-48,-155 Z" fill="${MUSCLES.traps.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="shoulders" style="--glow-color:${MUSCLES.shoulders.color}">
-      <ellipse cx="-52" cy="-148" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
-      <ellipse cx="52" cy="-148" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="lats" style="--glow-color:${MUSCLES.lats.color}">
-      <rect x="-48" y="-148" width="28" height="58" rx="4" fill="${MUSCLES.lats.color}" opacity="0.85"/>
-      <rect x="20" y="-148" width="28" height="58" rx="4" fill="${MUSCLES.lats.color}" opacity="0.85"/>
-    </g>
-    <g class="body-base"><rect x="-20" y="-148" width="40" height="40" rx="4" fill="${fill}"/></g>
-    <g class="muscle-group" data-muscle="lowerback" style="--glow-color:${MUSCLES.lowerback.color}">
-      <rect x="-30" y="-95" width="60" height="35" rx="6" fill="${MUSCLES.lowerback.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="triceps" style="--glow-color:${MUSCLES.triceps.color}">
-      <rect x="-72" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.triceps.color}" opacity="0.85"/>
-      <rect x="52" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.triceps.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="forearms" style="--glow-color:${MUSCLES.forearms.color}">
-      <rect x="-70" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
-      <rect x="52" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="glutes" style="--glow-color:${MUSCLES.glutes.color}">
-      <ellipse cx="-22" cy="-48" rx="20" ry="16" fill="${MUSCLES.glutes.color}" opacity="0.85"/>
-      <ellipse cx="22" cy="-48" rx="20" ry="16" fill="${MUSCLES.glutes.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="hamstrings" style="--glow-color:${MUSCLES.hamstrings.color}">
-      <rect x="-42" y="-32" width="34" height="68" rx="12" fill="${MUSCLES.hamstrings.color}" opacity="0.85"/>
-      <rect x="8" y="-32" width="34" height="68" rx="12" fill="${MUSCLES.hamstrings.color}" opacity="0.85"/>
-    </g>
-    <g class="muscle-group" data-muscle="calves" style="--glow-color:${MUSCLES.calves.color}">
-      <rect x="-38" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
-      <rect x="10" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
-    </g>`;
+function muscleShapes(view, body) {
+  return Object.entries(FIG[view]).map(([key, paths]) => {
+    const m = MUSCLES[key];
+    return `<g class="muscle-group" data-muscle="${key}" tabindex="0" role="button" aria-label="${m.name}" style="--glow-color:${m.color}" fill="${m.color}" stroke="${body}" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><title>${m.name}</title>${paths.map(mirror).join('')}</g>`;
+  }).join('');
 }
 
 function buildLabel(text, color, tx, ty, lx, ly) {
-  return `<g font-family="Inter, sans-serif" font-size="10" font-weight="600">
+  return `<g font-family="Inter, sans-serif" font-size="10" font-weight="600" pointer-events="none">
     <text x="${tx}" y="${ty}" text-anchor="${tx < 0 ? 'end' : 'start'}" fill="${color}">${text}</text>
-    <line x1="${tx < 0 ? tx+4 : tx-4}" y1="${ty-2}" x2="${lx}" y2="${ly}" stroke="${color}" stroke-width="0.7" opacity="0.4"/>
-    <circle cx="${lx}" cy="${ly}" r="1.8" fill="${color}" opacity="0.4"/>
+    <line x1="${tx < 0 ? tx+4 : tx-4}" y1="${ty-3}" x2="${lx}" y2="${ly}" stroke="${color}" stroke-width="0.7" opacity="0.55"/>
+    <circle cx="${lx}" cy="${ly}" r="1.8" fill="${color}"/>
   </g>`;
 }
 
 function buildSVG(view) {
   const cs = getComputedStyle(document.documentElement);
-  const fill = cs.getPropertyValue('--bg-card').trim() || '#161616';
-  const stroke = cs.getPropertyValue('--border').trim() || '#262626';
+  const body = cs.getPropertyValue('--body').trim() || '#ebe9e3';
+  const line = cs.getPropertyValue('--body-line').trim() || '#c9c5bc';
 
   const labels = view === 'front' ? [
-    buildLabel('Shoulders', MUSCLES.shoulders.color, -85, -152, -52, -155),
-    buildLabel('Chest',     MUSCLES.chest.color,     -85, -135, -42, -137),
-    buildLabel('Biceps',    MUSCLES.biceps.color,    -85, -118, -62, -123),
-    buildLabel('Forearms',  MUSCLES.forearms.color,  -85, -72,  -61, -71),
-    buildLabel('Abs',       MUSCLES.abs.color,        85, -86,   28, -86),
-    buildLabel('Obliques',  MUSCLES.obliques.color,   85, -102,  42, -100),
-    buildLabel('Quads',     MUSCLES.quads.color,      85, -6,    42, -6),
-    buildLabel('Calves',    MUSCLES.calves.color,     85,  65,   38,  65),
+    buildLabel('Shoulders', MUSCLES.shoulders.color, -84, -148, -52, -134),
+    buildLabel('Biceps',    MUSCLES.biceps.color,    -84, -104, -57, -98),
+    buildLabel('Forearms',  MUSCLES.forearms.color,  -84, -62,  -66, -64),
+    buildLabel('Quads',     MUSCLES.quads.color,     -84,  2,   -27, -6),
+    buildLabel('Chest',     MUSCLES.chest.color,      84, -134,  24, -130),
+    buildLabel('Obliques',  MUSCLES.obliques.color,   84, -96,   30, -86),
+    buildLabel('Abs',       MUSCLES.abs.color,        84, -74,   8,  -72),
+    buildLabel('Calves',    MUSCLES.calves.color,     84,  70,   30,  68),
   ] : [
-    buildLabel('Traps',      MUSCLES.traps.color,      -85, -163, -30, -160),
-    buildLabel('Triceps',    MUSCLES.triceps.color,     -85, -122, -62, -123),
-    buildLabel('Lats',       MUSCLES.lats.color,        -85, -143, -38, -130),
-    buildLabel('Lower Back', MUSCLES.lowerback.color,   -85, -80,  -30, -78),
-    buildLabel('Glutes',     MUSCLES.glutes.color,       85, -48,   42, -48),
-    buildLabel('Hamstrings', MUSCLES.hamstrings.color,   85,  2,    42,  2),
-    buildLabel('Calves',     MUSCLES.calves.color,       85,  65,   38,  65),
+    buildLabel('Traps',      MUSCLES.traps.color,     -84, -156, -14, -146),
+    buildLabel('Lats',       MUSCLES.lats.color,      -84, -122, -28, -108),
+    buildLabel('Triceps',    MUSCLES.triceps.color,   -84, -98,  -57, -98),
+    buildLabel('Lower Back', MUSCLES.lowerback.color, -84, -60,  -16, -62),
+    buildLabel('Shoulders',  MUSCLES.shoulders.color,  84, -148,  52, -134),
+    buildLabel('Forearms',   MUSCLES.forearms.color,   84, -66,   66, -64),
+    buildLabel('Glutes',     MUSCLES.glutes.color,     84, -30,   22, -36),
+    buildLabel('Hamstrings', MUSCLES.hamstrings.color, 84,  6,    28,  2),
+    buildLabel('Calves',     MUSCLES.calves.color,     84,  64,   30,  60),
   ];
 
   const viewLabel = view === 'front' ? 'FRONT' : 'BACK';
 
-  return `<svg viewBox="-150 -222 300 355" xmlns="http://www.w3.org/2000/svg" id="svg-${view}">
-    <text x="0" y="-207" text-anchor="middle" fill="${cs.getPropertyValue('--fg-tertiary').trim() || '#6b6b6b'}" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="600" letter-spacing="2">${viewLabel}</text>
-    ${bodyShape(view, fill, stroke)}
-    ${muscleShapes(view)}
+  return `<svg viewBox="-150 -222 300 355" xmlns="http://www.w3.org/2000/svg" id="svg-${view}" role="group" aria-label="${viewLabel.toLowerCase()} view">
+    <text x="0" y="-210" text-anchor="middle" fill="${cs.getPropertyValue('--fg-tertiary').trim() || '#6b6b6b'}" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="600" letter-spacing="2">${viewLabel}</text>
+    ${figureBase(body)}
+    ${muscleShapes(view, body)}
+    ${figureLines(body, line)}
     ${labels.join('')}
   </svg>`;
 }
@@ -622,6 +598,9 @@ function render() {
 
   wrap.querySelectorAll('.muscle-group').forEach(g => {
     g.addEventListener('click', () => selectMuscle(g.dataset.muscle));
+    g.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMuscle(g.dataset.muscle); }
+    });
     g.addEventListener('mouseenter', () => {
       if (!selectedMuscle) highlightMuscle(g.dataset.muscle, true);
     });
