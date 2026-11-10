@@ -1,4 +1,6 @@
 <title>Muscle Wiki</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
 <style>
@@ -14,6 +16,9 @@
     --accent: #2563eb;
     --body: #ebe9e3;
     --body-line: #c4c0b6;
+    --fig: #3a3a40;
+    --fig-far: #a9a9b0;
+    --prop: #908c84;
     --font-display: 'Space Grotesk', system-ui, sans-serif;
     --font-body: 'Inter', system-ui, sans-serif;
     --radius: 14px;
@@ -31,6 +36,9 @@
       --accent: #3b82f6;
     --body: #262626;
     --body-line: #454545;
+    --fig: #dcdce0;
+    --fig-far: #6c6c74;
+    --prop: #8b8b8b;
       color-scheme: dark;
     }
   }
@@ -45,10 +53,14 @@
     --accent: #3b82f6;
     --body: #262626;
     --body-line: #454545;
+    --fig: #dcdce0;
+    --fig-far: #6c6c74;
+    --prop: #8b8b8b;
     color-scheme: dark;
   }
 
   * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
   body {
     background: var(--bg);
     color: var(--fg);
@@ -214,15 +226,66 @@
   }
 
   /* Exercise cards */
-  .exercise-list { display: flex; flex-direction: column; gap: 10px; }
+  .exercise-list { display: flex; flex-direction: column; gap: 10px; container-type: inline-size; }
   .exercise-card {
     background: var(--bg-card);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
-    padding: 16px 18px;
+    padding: 14px;
     transition: border-color 0.2s, transform 0.15s;
     animation: cardIn 0.25s ease both;
+    display: grid;
+    grid-template-columns: 172px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
   }
+  @container (max-width: 430px) {
+    .exercise-card { grid-template-columns: minmax(0, 1fr); }
+    .demo { max-width: 250px; }
+  }
+  .demo {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 5 / 4;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: var(--bg-panel);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .demo canvas { display: block; width: 100%; height: 100%; }
+  .demo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .demo-state {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--fg-secondary);
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .demo-state::after { content: 'Pause'; }
+  .demo.paused .demo-state::after { content: 'Play'; }
+  .demo:hover .demo-state, .demo:focus-visible .demo-state, .demo.paused .demo-state { opacity: 1; }
+  .card-body { min-width: 0; }
+  .video-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .video-link:hover, .video-link:focus-visible { text-decoration: underline; }
   .exercise-card:hover { border-color: var(--fg-tertiary); }
   @keyframes cardIn {
     from { opacity: 0; transform: translateY(6px); }
@@ -581,12 +644,317 @@ function buildSVG(view) {
   </svg>`;
 }
 
+// ---- Exercise demos ----
+// A jointed figure in a 200x160 space with the floor at y=148. Each demo gives two poses (b inherits
+// from a) and an optional mid pose m for movements that travel on an arc. Hands and feet are targets; elbows and knees are solved with two-bone IK.
+// v: 's' side view facing right, 'f' front view. Pose keys: h hip, t torso lean (deg), hd/ft hand and
+// ankle targets (hd2/ft2 for the other limb), eb/kb bend side, fa foot angle, hn head tilt,
+// ts/as/ls torso, arm and leg foreshortening, sw shoulder width scale, sy shrug, ho head offset.
+const BONE = { torso: 34, upper: 19, fore: 18, thigh: 27, shin: 27, foot: 9, head: 7.5, sw: 15, hw: 7 };
+const POSE_DEFAULTS = { t: 0, fa: 0, hn: 0, ts: 1, sw: 1, sy: 0, ho: 12, as: 1, ls: 1 };
+const BEND_KEYS = new Set(['eb', 'kb', 'eb2', 'kb2']);
+const FRONT_PROPS = new Set(['plate', 'db', 'wheel', 'ball', 'wrist', 'barF', 'roller', 'sled', 'rope']);
+const SEGMENT = {
+  chest: 'torso', abs: 'torso', obliques: 'torso', lats: 'torso', traps: 'torso', lowerback: 'torso',
+  shoulders: 'shoulder', biceps: 'upper', triceps: 'upper', forearms: 'fore',
+  glutes: 'hip', quads: 'thigh', hamstrings: 'thigh', calves: 'shin'
+};
+const BENCH = [['rect', 54, 106, 74, 5], ['line', 64, 111, 64, 148, 3], ['line', 118, 111, 118, 148, 3]];
+
+const DEMOS = {
+  // Chest
+  'Barbell Bench Press': { v: 's', a: { h: [112, 102], t: -90, hd: [80, 92], ft: [136, 145] }, b: { hd: [79, 66] }, props: [...BENCH, ['plate', 10]] },
+  'Push-ups': { v: 's', a: { h: [88, 122.5], t: 68, hd: [122, 146], ft: [38, 140], fa: 80 }, b: { h: [92, 137], t: 87 } },
+  'Dumbbell Flyes': { v: 'f', a: { h: [100, 108], ts: 0.15, ho: 2, ls: 0.72, hd: [114, 67], ft: [112, 145] }, m: { hd: [141, 78] }, b: { hd: [150, 101] }, props: [['rect', 86, 104, 28, 8], ['line', 90, 112, 90, 148, 3], ['line', 110, 112, 110, 148, 3], ['db']] },
+  'Incline Dumbbell Press': { v: 's', a: { h: [112, 118], t: -50, hd: [90, 86], ft: [138, 145] }, b: { hd: [88, 60] }, props: [['line', 111, 125, 65, 87, 5], ['line', 109, 126, 126, 126, 5], ['line', 96, 114, 96, 148, 3], ['db']] },
+  'Cable Crossover': { v: 'f', a: { h: [100, 91], hd: [142, 66], ft: [110, 145] }, b: { hd: [103, 92] }, props: [['line', 172, 20, 172, 148, 3], ['line', 28, 20, 28, 148, 3], ['cable', 170, 24, 'hands']] },
+  // Shoulders
+  'Overhead Press': { v: 's', a: { h: [100, 91], hd: [107, 58], ft: [100, 145] }, b: { hd: [102, 21] }, props: [['plate', 10]] },
+  'Lateral Raises': { v: 'f', a: { h: [100, 91], hd: [120, 93], ft: [107, 145] }, m: { hd: [141, 82] }, b: { hd: [150, 60] }, props: [['db']] },
+  'Face Pulls': { v: 's', a: { h: [98, 91], t: -4, hd: [132, 58], ft: [100, 145], eb: -1 }, b: { h: [97, 91], t: -8, hd: [105, 47], as: 0.75 }, props: [['line', 170, 20, 170, 148, 3], ['cable', 168, 44, 'hand']] },
+  'Arnold Press': { v: 'f', a: { h: [100, 91], hd: [108, 62], ft: [107, 145] }, b: { hd: [116, 20] }, props: [['db']] },
+  'Reverse Pec Deck': { v: 'f', a: { h: [100, 112], ls: 0.62, hd: [106, 84], ft: [108, 145] }, b: { hd: [151, 80] }, props: [['rect', 95, 40, 10, 108], ['rect', 84, 114, 32, 5]] },
+  // Biceps
+  'Barbell Curl': { v: 's', a: { h: [100, 91], hd: [106, 93], ft: [100, 145] }, m: { hd: [117, 78] }, b: { hd: [110, 62] }, props: [['plate', 8]] },
+  'Hammer Curl': { v: 's', a: { h: [100, 91], hd: [110, 62], hd2: [104, 93], ft: [100, 145] }, b: { hd: [104, 93], hd2: [110, 62] }, props: [['db']] },
+  'Chin-ups': { v: 's', a: { h: [100, 89], hd: [104, 18], ft: [88, 132] }, b: { h: [98, 60], t: 4, ft: [86, 104] }, props: [['line', 104, 4, 104, 14, 2], ['circle', 104, 16, 3]] },
+  'Incline Dumbbell Curl': { v: 's', a: { h: [108, 120], t: -35, hd: [88, 128], ft: [134, 145] }, b: { hd: [101, 98] }, props: [['line', 105, 127, 72, 79, 5], ['line', 104, 127, 122, 127, 5], ['line', 92, 110, 92, 148, 3], ['db']] },
+  // Triceps
+  'Tricep Dips': { v: 's', a: { h: [98, 93], t: 3, hd: [100, 96], ft: [84, 134] }, b: { h: [92, 112], t: 15, ft: [76, 140] }, props: [['line', 74, 99, 126, 99, 3], ['line', 80, 99, 80, 148, 3], ['line', 120, 99, 120, 148, 3]] },
+  'Tricep Pushdown': { v: 's', a: { h: [98, 91], t: 6, hd: [117, 70], ft: [100, 145] }, b: { hd: [105, 93] }, props: [['line', 134, 10, 134, 148, 3], ['cable', 132, 14, 'hand']] },
+  'Skull Crushers': { v: 's', a: { h: [112, 102], t: -90, hd: [62, 91], ft: [136, 145] }, b: { hd: [78, 65] }, props: [...BENCH, ['plate', 7]] },
+  'Overhead Tricep Extension': { v: 's', a: { h: [100, 91], hd: [89, 49], ft: [100, 145] }, b: { hd: [101, 20.5] }, props: [['db']] },
+  // Forearms
+  'Wrist Curls': { v: 's', a: { h: [88, 112], t: 25, hd: [119, 110], ft: [118, 145] }, b: {}, props: [['rect', 70, 116, 36, 5], ['line', 76, 121, 76, 148, 3], ['line', 100, 121, 100, 148, 3], ['wrist', 55, -40]] },
+  'Reverse Curls': { v: 's', a: { h: [100, 91], hd: [106, 93], ft: [100, 145] }, m: { hd: [117, 78] }, b: { hd: [111, 64] }, props: [['plate', 7]] },
+  "Farmer's Walk": { v: 's', a: { h: [100, 93], t: 2, hd: [102, 97], ft: [114, 145], ft2: [86, 143], fa2: 25 }, b: { ft: [86, 143], ft2: [114, 145], fa: 25, fa2: 0 }, props: [['db']], dur: 1500 },
+  // Abs
+  'Plank': { v: 's', a: { h: [86.4, 132.5], t: 80.7, hd: [138, 146], ft: [34, 141], fa: 80 }, b: { h: [86.4, 131], t: 81.5 }, dur: 4000 },
+  'Hanging Leg Raises': { v: 's', a: { h: [100, 89], hd: [100, 18], ft: [102, 142], fa: 20 }, m: { ft: [135, 126] }, b: { h: [96, 89], t: -4, ft: [149, 86], fa: -80 }, props: [['line', 100, 4, 100, 14, 2], ['circle', 100, 16, 3]] },
+  'Cable Crunches': { v: 's', a: { h: [97, 120], t: 10, hd: [108, 78], ft: [78, 144], fa: 180 }, b: { h: [94, 121], t: 75, hd: [136, 103] }, props: [['line', 150, 6, 150, 148, 3], ['line', 128, 8, 150, 8, 3], ['cable', 128, 10, 'hand']] },
+  'Ab Wheel Rollout': { v: 's', a: { h: [80, 119], t: 65, hd: [112, 140], ft: [58, 145], fa: 180 }, b: { h: [108.5, 134.7], t: 82, hd: [176, 140] }, props: [['wheel', 8]] },
+  // Obliques
+  'Russian Twists': { v: 'f', a: { h: [100, 130], t: -14, ts: 0.8, ls: 0.62, sw: 0.75, hd: [74, 118], hd2: [74, 118], ft: [112, 140] }, b: { t: 14, hd: [126, 118], hd2: [126, 118] }, props: [['ball', 5]], dur: 2000 },
+  'Side Plank': { v: 's', a: { h: [86.4, 131], t: 80.7, hd: [138, 146], hd2: [122, 92], ft: [34, 141], fa: 80 }, b: { h: [86.4, 135.5], t: 83 }, dur: 3200 },
+  'Woodchops': { v: 'f', a: { h: [100, 91], t: -14, sw: 0.6, hd: [74, 40], hd2: [74, 40], ft: [114, 145] }, b: { t: 12, hd: [116, 90], hd2: [116, 90] }, props: [['line', 24, 10, 24, 148, 3], ['cable', 26, 18, 'hand']] },
+  // Lats
+  'Pull-ups': { v: 'f', a: { h: [100, 88], hd: [122, 18], ft: [106, 141.5] }, b: { h: [100, 62], ft: [106, 115.5] }, props: [['line', 44, 16, 156, 16, 3]] },
+  'Barbell Row': { v: 's', a: { h: [88, 96], t: 62, hd: [120, 116], ft: [96, 145] }, b: { hd: [106, 92] }, props: [['plate', 10]] },
+  'Lat Pulldown': { v: 'f', a: { h: [100, 118], ls: 0.52, hd: [124, 49], ft: [108, 145] }, b: { hd: [124, 78] }, props: [['rect', 84, 120, 32, 5], ['barF', 10, false, true]] },
+  'Seated Cable Row': { v: 's', a: { h: [70, 124], t: 12, hd: [112, 100], ft: [118, 128], fa: -70 }, b: { t: -6, hd: [82, 105] }, props: [['rect', 52, 128, 42, 5], ['line', 58, 133, 58, 148, 3], ['line', 88, 133, 88, 148, 3], ['line', 124, 114, 124, 140, 4], ['line', 154, 60, 154, 148, 3], ['cable', 152, 108, 'hand']] },
+  // Traps
+  'Barbell Shrugs': { v: 'f', a: { h: [100, 91], hd: [119, 93], ft: [107, 145] }, b: { sy: -7, hd: [119, 86] }, props: [['barF', 22, true, false]], dur: 2000 },
+  'Rack Pulls': { v: 's', a: { h: [86, 98], t: 45, hd: [112, 110], ft: [98, 145] }, b: { h: [98, 91], t: -2, hd: [104, 93] }, props: [['line', 128, 70, 128, 148, 3], ['line', 104, 123, 128, 123, 3], ['plate', 11]] },
+  // Lower back
+  'Hyperextensions': { v: 's', a: { h: [96, 102], t: 135, hd: [113, 119], ft: [60, 140], fa: 60, eb: -1 }, b: { t: 45, hd: [113, 85] }, props: [['line', 88, 116, 104, 102, 6], ['line', 97, 112, 97, 148, 3], ['line', 57, 136, 80, 148, 3], ['circle', 57, 136, 3.5]] },
+  'Good Mornings': { v: 's', a: { h: [98, 91], hd: [95, 57], ft: [100, 145], eb: -1 }, b: { h: [88, 96], t: 70, hd: [119, 81.6] }, props: [['plate', 9]] },
+  'Superman Hold': { v: 's', a: { h: [96, 140], t: 88, hd: [166, 142], ft: [43, 142], fa: 180 }, b: { h: [96, 141], t: 74, hd: [163, 122], ft: [45, 129], fa: 190 }, dur: 3600 },
+  // Glutes
+  'Hip Thrusts': { v: 's', a: { h: [96, 128], t: -54.5, hd: [100, 125], ft: [128, 145] }, b: { h: [100, 106], t: -93.5, hd: [102, 104] }, props: [['rect', 38, 112, 34, 6], ['line', 44, 118, 44, 148, 3], ['line', 66, 118, 66, 148, 3], ['plate', 10]] },
+  'Bulgarian Split Squats': { v: 's', a: { h: [92, 96], t: 8, hd: [98, 99], ft: [112, 145], ft2: [58, 114], fa2: 150 }, b: { h: [90, 116], t: 10, hd: [96, 119] }, props: [['rect', 40, 119, 30, 5], ['line', 46, 124, 46, 148, 3], ['line', 64, 124, 64, 148, 3], ['db']] },
+  'Glute Bridge': { v: 's', a: { h: [90, 141], t: -90, hd: [92, 144], ft: [118, 145] }, b: { h: [81, 118], t: -132.6, hn: 42.6 } },
+  'Cable Kickbacks': { v: 's', a: { h: [96, 92], t: 18, hd: [128, 70], ft: [108, 143], ft2: [104, 145], fa2: 0 }, b: { t: 20, ft: [66, 128], fa: 60 }, props: [['line', 134, 20, 134, 148, 3], ['cable', 132, 142, 'foot']] },
+  // Quads
+  'Barbell Squat': { v: 's', a: { h: [98, 91], t: 3, hd: [96.8, 56], ft: [102, 145], eb: -1 }, b: { h: [86, 120], t: 38, hd: [104.5, 91.3] }, props: [['plate', 11]] },
+  'Leg Press': { v: 's', a: { h: [70, 126], t: -55, hd: [74, 118], ft: [104, 104], fa: -55 }, b: { ft: [112, 95] }, props: [['line', 68, 132, 30, 105, 5], ['line', 66, 132, 84, 134, 5], ['line', 88, 136, 152, 88, 2], ['sled']] },
+  'Walking Lunges': { v: 's', a: { h: [100, 91], hd: [102, 93], ft: [100, 145], ft2: [100, 145], fa2: 0 }, b: { h: [98, 112], t: 4, hd: [100, 114], ft: [124, 145], ft2: [72, 141], fa2: 70 }, props: [['db']] },
+  'Leg Extension': { v: 's', a: { h: [78, 108], t: -12, hd: [80, 110], ft: [103, 135] }, m: { ft: [124, 127] }, b: { ft: [131, 104], fa: -60 }, props: [['rect', 64, 112, 42, 5], ['line', 68, 114, 60, 72, 5], ['line', 84, 117, 84, 148, 3], ['roller', 'an', 5, -2, 105, 112, 2, -6]] },
+  // Hamstrings
+  'Romanian Deadlift': { v: 's', a: { h: [98, 91], hd: [104, 93], ft: [100, 145] }, b: { h: [88, 95], t: 72, hd: [112, 120] }, props: [['plate', 11]] },
+  'Lying Leg Curl': { v: 's', a: { h: [96, 106], t: 90, hd: [122, 124], ft: [43, 107], fa: 120, eb: -1 }, m: { ft: [47, 91.5] }, b: { ft: [60, 82], fa: 210 }, props: [['rect', 60, 110, 74, 5], ['line', 70, 115, 70, 148, 3], ['line', 124, 115, 124, 148, 3], ['roller', 'an', 0, -6, 69, 113, 6, 0]] },
+  'Nordic Curl': { v: 's', a: { h: [70, 119], hd: [78, 92], ft: [44, 145], fa: 180 }, b: { h: [92.1, 130.5], t: 55, hd: [140, 140] }, props: [['rect', 36, 136, 14, 4], ['line', 40, 140, 40, 148, 3]], dur: 3400 },
+  'Stiff-Leg Deadlift': { v: 's', a: { h: [98, 91], hd: [103, 93], ft: [100, 145] }, b: { h: [90, 93], t: 85, hd: [122, 126] }, props: [['db']] },
+  // Calves
+  'Standing Calf Raises': { v: 's', a: { h: [98, 87], hd: [104, 50], ft: [98, 141], fa: 5 }, b: { h: [98, 77], hd: [104, 40], ft: [99, 131], fa: 50 }, props: [['rect', 94, 145, 22, 3], ['line', 66, 20, 66, 148, 3], ['roller', 'sh', 0, -8, 66, 56]], dur: 2000 },
+  'Seated Calf Raises': { v: 's', a: { h: [76, 112], t: 5, hd: [100, 103], ft: [104, 140], fa: 5 }, b: { hd: [99, 97], ft: [104, 134], fa: 45 }, props: [['rect', 60, 116, 30, 5], ['line', 66, 121, 66, 148, 3], ['rect', 98, 145, 20, 3], ['line', 140, 96, 140, 148, 3], ['roller', 'kn', 0, -7, 140, 96]], dur: 2000 },
+  'Jump Rope': { v: 's', a: { h: [100, 91], t: 2, hd: [107, 93], ft: [100, 145], fa: 10 }, b: { h: [100, 82], hd: [107, 84], ft: [101, 136], fa: 55 }, props: [['rope']], dur: 800 }
+};
+
+function poseAt(demo, e) {
+  if (!demo.m) return mixPose(demo.a, demo.b, e);
+  const mid = { ...mixPose(demo.a, demo.b, 0.5), ...demo.m };
+  return e < 0.5 ? mixPose(demo.a, mid, e * 2) : mixPose(mid, mixPose(demo.a, demo.b, 1), e * 2 - 1);
+}
+
+function mixPose(a, b, e) {
+  const out = {};
+  for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    if (BEND_KEYS.has(k)) { out[k] = a[k] ?? b[k]; continue; }
+    const base = k.endsWith('2') ? k.slice(0, -1) : k;
+    const x = a[k] ?? a[base] ?? POSE_DEFAULTS[base];
+    const y = b[k] ?? x;
+    out[k] = Array.isArray(x) ? [x[0] + (y[0] - x[0]) * e, x[1] + (y[1] - x[1]) * e] : x + (y - x) * e;
+  }
+  return { ...POSE_DEFAULTS, ...out };
+}
+
+// Two-bone IK: returns [joint, end]. pick: 1 / -1 choose a side of the root-to-target line,
+// 'down' the lower joint, 'out' the one farther from the body's centre line cx.
+function ik(s, t, l1, l2, pick, cx) {
+  const dx = t[0] - s[0], dy = t[1] - s[1];
+  const d = Math.hypot(dx, dy) || 0.001;
+  const ux = dx / d, uy = dy / d;
+  const r = Math.min(Math.max(d, Math.abs(l1 - l2) + 0.01), l1 + l2 - 0.01);
+  const a = (l1 * l1 - l2 * l2 + r * r) / (2 * r);
+  const h = Math.sqrt(Math.max(l1 * l1 - a * a, 0));
+  const m = [s[0] + ux * a, s[1] + uy * a];
+  const p = [m[0] - uy * h, m[1] + ux * h], q = [m[0] + uy * h, m[1] - ux * h];
+  let j;
+  if (pick === 'down') j = p[1] >= q[1] ? p : q;
+  else if (pick === 'out') j = Math.abs(p[0] - cx) >= Math.abs(q[0] - cx) ? p : q;
+  else j = pick === -1 ? q : p;
+  return [j, [s[0] + ux * r, s[1] + uy * r]];
+}
+
+function joints(view, p) {
+  const rad = Math.PI / 180;
+  const sc = [p.h[0] + Math.sin(p.t * rad) * BONE.torso * p.ts, p.h[1] - Math.cos(p.t * rad) * BONE.torso * p.ts];
+  const ua = BONE.upper * p.as, fo = BONE.fore * p.as, th = BONE.thigh * p.ls, sn = BONE.shin * p.ls;
+  if (view === 's') {
+    const ha = (p.t + p.hn) * rad;
+    const toe = (an, deg) => [an[0] + Math.cos(deg * rad) * BONE.foot, an[1] + Math.sin(deg * rad) * BONE.foot];
+    const [e1, w1] = ik(sc, p.hd, ua, fo, p.eb ?? 1);
+    const [e2, w2] = ik(sc, p.hd2 ?? p.hd, ua, fo, p.eb2 ?? p.eb ?? 1);
+    const [k1, a1] = ik(p.h, p.ft, th, sn, p.kb ?? -1);
+    const [k2, a2] = ik(p.h, p.ft2 ?? p.ft, th, sn, p.kb2 ?? p.kb ?? -1);
+    return {
+      head: [sc[0] + Math.sin(ha) * p.ho, sc[1] - Math.cos(ha) * p.ho],
+      sh: [sc, sc], hip: [p.h, p.h], el: [e1, e2], wr: [w1, w2], kn: [k1, k2], an: [a1, a2],
+      toe: [toe(a1, p.fa), toe(a2, p.fa2 ?? p.fa)]
+    };
+  }
+  const cx = p.h[0], sw = BONE.sw * p.sw;
+  const mir = v => [2 * cx - v[0], v[1]];
+  const sR = [sc[0] + sw, sc[1] + p.sy], sL = [sc[0] - sw, sc[1] + p.sy];
+  const hR = [cx + BONE.hw, p.h[1]], hL = [cx - BONE.hw, p.h[1]];
+  const [e1, w1] = ik(sR, p.hd, ua, fo, p.eb ?? 'down', cx);
+  const [e2, w2] = ik(sL, p.hd2 ?? mir(p.hd), ua, fo, p.eb ?? 'down', cx);
+  const [k1, a1] = ik(hR, p.ft, th, sn, p.kb ?? 'out', cx);
+  const [k2, a2] = ik(hL, p.ft2 ?? mir(p.ft), th, sn, p.kb ?? 'out', cx);
+  return {
+    head: [sc[0], sc[1] - p.ho], sh: [sR, sL], hip: [hR, hL], el: [e1, e2], wr: [w1, w2], kn: [k1, k2], an: [a1, a2],
+    toe: [[a1[0] + 5, a1[1] + 2], [a2[0] - 5, a2[1] + 2]]
+  };
+}
+
+function strokeLine(ctx, a, b, w, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+}
+function fillDot(ctx, c, r, color) {
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2); ctx.fill();
+}
+function ring(ctx, c, r, w, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2); ctx.stroke();
+}
+
+function drawProp(ctx, pr, J, e, u, th, side) {
+  const [kind, a, b, c, d, f] = pr;
+  if (kind === 'rect') { ctx.fillStyle = th.prop; ctx.fillRect(a, b, c, d); }
+  else if (kind === 'line') strokeLine(ctx, [a, b], [c, d], f, th.prop);
+  else if (kind === 'circle') fillDot(ctx, [a, b], c, th.prop);
+  else if (kind === 'cable') {
+    const ends = c === 'hands' ? [[[a, b], J.wr[0]], [[200 - a, b], J.wr[1]]] : [[[a, b], c === 'foot' ? J.an[0] : J.wr[0]]];
+    for (const [from, to] of ends) { strokeLine(ctx, from, to, 1.3, th.prop); fillDot(ctx, from, 3, th.prop); }
+  }
+  else if (kind === 'plate') { ring(ctx, J.wr[0], a, 3.5, th.prop); fillDot(ctx, J.wr[0], 2, th.prop); }
+  else if (kind === 'wheel') { ring(ctx, J.wr[0], a - 1.5, 3, th.prop); fillDot(ctx, J.wr[0], 1.8, th.prop); }
+  else if (kind === 'ball') fillDot(ctx, J.wr[0], a, th.prop);
+  else if (kind === 'db') {
+    for (const w of J.wr) {
+      if (side) fillDot(ctx, w, 4.2, th.prop);
+      else strokeLine(ctx, [w[0] - 4.5, w[1]], [w[0] + 4.5, w[1]], 5.5, th.prop);
+    }
+  }
+  else if (kind === 'wrist') {
+    const ang = (a + (b - a) * e) * Math.PI / 180, w = J.wr[0];
+    const tip = [w[0] + Math.cos(ang) * 7, w[1] + Math.sin(ang) * 7];
+    strokeLine(ctx, w, tip, 4.5, th.fig);
+    fillDot(ctx, tip, 4.2, th.prop);
+  }
+  else if (kind === 'barF') {
+    const l = J.wr[1], r = J.wr[0];
+    strokeLine(ctx, [l[0] - a, l[1]], [r[0] + a, r[1]], 2.6, th.prop);
+    if (b) { ctx.fillStyle = th.prop; ctx.fillRect(l[0] - a - 2, l[1] - 9, 4.5, 18); ctx.fillRect(r[0] + a - 2.5, r[1] - 9, 4.5, 18); }
+    if (c) strokeLine(ctx, [(l[0] + r[0]) / 2, l[1]], [(l[0] + r[0]) / 2, 4], 1.3, th.prop);
+  }
+  else if (kind === 'roller') {
+    const [, joint, ox, oy, px, py, ox2 = ox, oy2 = oy] = pr;
+    const at = [J[joint][0][0] + ox + (ox2 - ox) * e, J[joint][0][1] + oy + (oy2 - oy) * e];
+    strokeLine(ctx, [px, py], at, 2.4, th.prop);
+    fillDot(ctx, at, 4, th.prop);
+  }
+  else if (kind === 'sled') {
+    const m = [J.an[0][0] + 0.8 * 8, J.an[0][1] - 0.6 * 8];
+    strokeLine(ctx, [m[0] - 0.6 * 14, m[1] - 0.8 * 14], [m[0] + 0.6 * 14, m[1] + 0.8 * 14], 4.5, th.prop);
+  }
+  else if (kind === 'rope') {
+    const w = J.wr[0], swing = Math.cos(2 * Math.PI * u);
+    const reach = swing > 0 ? swing * 66 : swing * (151 - w[1]);
+    ctx.strokeStyle = th.prop; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.ellipse(w[0] - 7, w[1] - reach / 2, 15, Math.max(Math.abs(reach) / 2, 0.5), 0, 0, Math.PI * 2); ctx.stroke();
+  }
+}
+
+function drawDemo(ctx, demo, u, muscle, th) {
+  const e = (1 - Math.cos(2 * Math.PI * u)) / 2;
+  const J = joints(demo.v, poseAt(demo, e));
+  const seg = SEGMENT[muscle], mc = MUSCLES[muscle].color, side = demo.v === 's';
+  const props = demo.props || [];
+  ctx.clearRect(0, 0, 200, 160);
+  ctx.lineCap = ctx.lineJoin = 'round';
+  strokeLine(ctx, [8, 150.5], [192, 150.5], 1.5, th.floor);
+  for (const pr of props) if (!FRONT_PROPS.has(pr[0])) drawProp(ctx, pr, J, e, u, th, side);
+
+  const bone = (a, b, w, name, far) => {
+    const hit = name === seg;
+    ctx.globalAlpha = hit && far ? 0.5 : 1;
+    strokeLine(ctx, a, b, w, hit ? mc : far ? th.far : th.fig);
+    ctx.globalAlpha = 1;
+  };
+  const leg = (i, far) => { bone(J.hip[i], J.kn[i], 7, 'thigh', far); bone(J.kn[i], J.an[i], 6, 'shin', far); bone(J.an[i], J.toe[i], 5, 'foot', far); };
+  const arm = (i, far) => { bone(J.sh[i], J.el[i], 6, 'upper', far); bone(J.el[i], J.wr[i], 5.5, 'fore', far); };
+
+  if (side) {
+    leg(1, true); arm(1, true);
+    bone(J.hip[0], J.sh[0], 10, 'torso');
+    fillDot(ctx, J.head, BONE.head, th.fig);
+    leg(0); arm(0);
+  } else {
+    leg(0); leg(1);
+    ctx.fillStyle = ctx.strokeStyle = seg === 'torso' ? mc : th.fig;
+    ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(...J.sh[0]); ctx.lineTo(...J.sh[1]); ctx.lineTo(...J.hip[1]); ctx.lineTo(...J.hip[0]); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    fillDot(ctx, J.head, BONE.head, th.fig);
+    arm(0); arm(1);
+  }
+  if (seg === 'shoulder') J.sh.forEach(s => fillDot(ctx, s, 5.5, mc));
+  if (seg === 'hip') J.hip.forEach(h => fillDot(ctx, h, 7, mc));
+  for (const pr of props) if (FRONT_PROPS.has(pr[0])) drawProp(ctx, pr, J, e, u, th, side);
+}
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let THEME = {};
+let demoItems = [];
+let demoFrame = 0;
+
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = name => cs.getPropertyValue(name).trim();
+  THEME = { fig: v('--fig'), far: v('--fig-far'), prop: v('--prop'), floor: v('--border') };
+}
+
+function paintDemo(item) { drawDemo(item.ctx, item.demo, item.u, item.muscle, THEME); }
+
+function syncDemoButton(item) {
+  item.btn.classList.toggle('paused', !item.playing);
+  item.btn.setAttribute('aria-label', `${item.playing ? 'Pause' : 'Play'} ${item.name} demo`);
+}
+
+function demoTick(now) {
+  demoFrame = 0;
+  let running = false;
+  for (const item of demoItems) {
+    if (!item.playing) continue;
+    item.u = ((now - item.t0) / item.dur) % 1;
+    paintDemo(item);
+    running = true;
+  }
+  if (running) demoFrame = requestAnimationFrame(demoTick);
+}
+
+function startDemos() { if (!demoFrame) demoFrame = requestAnimationFrame(demoTick); }
+
+function setupDemos(list, exercises) {
+  demoItems = [...list.querySelectorAll('.demo')].map(btn => {
+    const ex = exercises[+btn.dataset.i];
+    const demo = DEMOS[ex.name];
+    const ctx = btn.querySelector('canvas').getContext('2d');
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    const still = reduceMotion.matches;
+    const item = { btn, ctx, demo, name: ex.name, muscle: selectedMuscle, dur: demo.dur || 2600, u: still ? 0.5 : 0, playing: !still, t0: performance.now() };
+    btn.addEventListener('click', () => {
+      item.playing = !item.playing;
+      if (item.playing) item.t0 = performance.now() - item.u * item.dur;
+      syncDemoButton(item);
+      startDemos();
+    });
+    syncDemoButton(item);
+    paintDemo(item);
+    return item;
+  });
+  startDemos();
+}
+
 // State
 let selectedMuscle = null;
 let activeFilter = 'All';
 let currentView = window.innerWidth <= 768 ? 'front' : 'both';
 
 function render() {
+  readTheme();
+  demoItems.forEach(paintDemo);
   const wrap = document.getElementById('bodyWrap');
   wrap.innerHTML = buildSVG('front') + buildSVG('back');
 
@@ -631,6 +999,7 @@ function selectMuscle(muscle) {
     });
     document.getElementById('emptyState').hidden = false;
     document.getElementById('exerciseContent').hidden = true;
+    demoItems = [];
     return;
   }
 
@@ -681,19 +1050,28 @@ function renderExercises() {
     const typeClass = ex.type === 'Compound' ? 'type-compound' : ex.type === 'Isolation' ? 'type-isolation' : 'type-isometric';
     const dots = [1,2,3].map(d => `<div class="diff-dot${d <= ex.diff ? ' filled' : ''}"></div>`).join('');
     const secondary = ex.secondary.length ? `<div class="card-muscles">Also works: <span>${ex.secondary.join(', ')}</span></div>` : '';
+    const videos = `https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' proper form')}`;
     return `<div class="exercise-card" style="animation-delay:${i * 0.04}s">
-      <div class="card-top">
-        <h3>${ex.name}</h3>
-        <div class="diff-dots" title="${['','Beginner','Intermediate','Advanced'][ex.diff]}">${dots}</div>
+      <button class="demo" type="button" id="demo-${selectedMuscle}-${i}" data-i="${i}">
+        <canvas width="400" height="320"></canvas>
+        <span class="demo-state" aria-hidden="true"></span>
+      </button>
+      <div class="card-body">
+        <div class="card-top">
+          <h3>${ex.name}</h3>
+          <div class="diff-dots" title="${['','Beginner','Intermediate','Advanced'][ex.diff]}">${dots}</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag ${typeClass}">${ex.type}</span>
+          <span class="tag">${ex.equip}</span>
+        </div>
+        <div class="card-desc">${ex.desc}</div>
+        ${secondary}
+        <a class="video-link" href="${videos}" target="_blank" rel="noopener">Watch real videos on YouTube</a>
       </div>
-      <div class="card-tags">
-        <span class="tag ${typeClass}">${ex.type}</span>
-        <span class="tag">${ex.equip}</span>
-      </div>
-      <div class="card-desc">${ex.desc}</div>
-      ${secondary}
     </div>`;
   }).join('');
+  setupDemos(list, filtered);
 }
 
 function setFilter(f) {
