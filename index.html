@@ -1,0 +1,1097 @@
+<title>Muscle Wiki</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+  /* Layout: split-panel app — body diagram left, exercise panel right; stacks on mobile */
+  :root {
+    --bg: #f8f7f4;
+    --bg-card: #ffffff;
+    --bg-panel: #f0efeb;
+    --border: #e2e0db;
+    --fg: #1a1a1a;
+    --fg-secondary: #5c5c5c;
+    --fg-tertiary: #8a8a8a;
+    --accent: #2563eb;
+    --body: #ebe9e3;
+    --body-line: #c4c0b6;
+    --fig: #3a3a40;
+    --fig-far: #a9a9b0;
+    --prop: #908c84;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c0c0c;
+      --bg-card: #161616;
+      --bg-panel: #111111;
+      --border: #262626;
+      --fg: #e5e5e5;
+      --fg-secondary: #a3a3a3;
+      --fg-tertiary: #6b6b6b;
+      --accent: #3b82f6;
+    --body: #262626;
+    --body-line: #454545;
+    --fig: #dcdce0;
+    --fig-far: #6c6c74;
+    --prop: #8b8b8b;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c0c0c;
+    --bg-card: #161616;
+    --bg-panel: #111111;
+    --border: #262626;
+    --fg: #e5e5e5;
+    --fg-secondary: #a3a3a3;
+    --fg-tertiary: #6b6b6b;
+    --accent: #3b82f6;
+    --body: #262626;
+    --body-line: #454545;
+    --fig: #dcdce0;
+    --fig-far: #6c6c74;
+    --prop: #8b8b8b;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    margin: 0;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    padding: 28px 0 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  header p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--fg-tertiary);
+  }
+
+  /* Main layout */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    flex: 1;
+    padding-bottom: 40px;
+    align-items: start;
+  }
+
+  /* Body diagram section */
+  .diagram-section {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    padding-top: 4px;
+  }
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    background: var(--bg-panel);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    width: fit-content;
+  }
+  .view-toggle button {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--fg-tertiary);
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .view-toggle button.active {
+    background: var(--bg-card);
+    color: var(--fg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .body-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 420px;
+    position: relative;
+    overflow: hidden;
+  }
+  .body-svg-wrap {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    width: 100%;
+  }
+  .body-svg-wrap svg { max-height: 440px; width: auto; }
+  .body-svg-wrap svg.hidden-view { display: none; }
+
+  /* SVG muscle interactivity */
+  .muscle-group { cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
+  .muscle-group:hover { opacity: 1 !important; filter: brightness(1.25); }
+  .muscle-group.active { opacity: 1 !important; filter: brightness(1.15) drop-shadow(0 0 8px var(--glow-color, #fff)); }
+  .muscle-group.dimmed { opacity: 0.3 !important; }
+  .muscle-group:focus-visible { outline: none; opacity: 1 !important; filter: brightness(1.25) drop-shadow(0 0 6px var(--glow-color, #fff)); }
+
+  .body-base { pointer-events: none; }
+
+  /* Exercise panel */
+  .exercise-panel { min-width: 0; }
+  .panel-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .panel-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+    transition: color 0.3s;
+  }
+  .panel-header .count {
+    font-size: 0.78rem;
+    color: var(--fg-tertiary);
+    font-weight: 500;
+  }
+
+  /* Filter chips */
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--fg-secondary);
+    transition: all 0.2s;
+  }
+  .filter-chip:hover { border-color: var(--fg-tertiary); color: var(--fg); }
+  .filter-chip.active {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+
+  /* Exercise cards */
+  .exercise-list { display: flex; flex-direction: column; gap: 10px; container-type: inline-size; }
+  .exercise-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 14px;
+    transition: border-color 0.2s, transform 0.15s;
+    animation: cardIn 0.25s ease both;
+    display: grid;
+    grid-template-columns: 172px minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  @container (max-width: 430px) {
+    .exercise-card { grid-template-columns: minmax(0, 1fr); }
+    .demo { max-width: 250px; }
+  }
+  .demo {
+    position: relative;
+    display: block;
+    width: 100%;
+    aspect-ratio: 5 / 4;
+    padding: 0;
+    border: 0;
+    border-radius: 6px;
+    background: var(--bg-panel);
+    cursor: pointer;
+    overflow: hidden;
+  }
+  .demo canvas { display: block; width: 100%; height: 100%; }
+  .demo:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .demo-state {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: var(--bg-card);
+    color: var(--fg-secondary);
+    font-family: var(--font-body);
+    font-size: 0.62rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .demo-state::after { content: 'Pause'; }
+  .demo.paused .demo-state::after { content: 'Play'; }
+  .demo:hover .demo-state, .demo:focus-visible .demo-state, .demo.paused .demo-state { opacity: 1; }
+  .card-body { min-width: 0; }
+  .video-link {
+    display: inline-block;
+    margin-top: 8px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--accent);
+    text-decoration: none;
+  }
+  .video-link:hover, .video-link:focus-visible { text-decoration: underline; }
+  .exercise-card:hover { border-color: var(--fg-tertiary); }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .card-top h3 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .diff-dots { display: flex; gap: 3px; flex-shrink: 0; padding-top: 4px; }
+  .diff-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .diff-dot.filled { background: var(--accent); }
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-panel);
+    color: var(--fg-secondary);
+    letter-spacing: 0.02em;
+  }
+  .tag.type-compound { color: #16a34a; }
+  .tag.type-isolation { color: #ea580c; }
+  .tag.type-isometric { color: #7c3aed; }
+  .card-desc {
+    font-size: 0.82rem;
+    color: var(--fg-secondary);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .card-muscles {
+    font-size: 0.72rem;
+    color: var(--fg-tertiary);
+  }
+  .card-muscles span { color: var(--fg-secondary); font-weight: 500; }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    min-height: 300px;
+  }
+  .empty-state .icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.15;
+    filter: grayscale(1);
+  }
+  .empty-state p {
+    color: var(--fg-tertiary);
+    font-size: 0.88rem;
+    margin: 0;
+    max-width: 240px;
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  footer {
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--fg-tertiary);
+    text-align: center;
+  }
+  footer a { color: var(--fg-secondary); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .diagram-section { position: static; }
+    .body-container { min-height: 340px; padding: 16px; }
+    .body-svg-wrap svg { max-height: 340px; }
+    header { padding: 20px 0 16px; }
+    header h1 { font-size: 1.35rem; }
+  }
+  @media (min-width: 769px) {
+    .view-toggle .btn-front,
+    .view-toggle .btn-back { display: none; }
+    .body-svg-wrap svg.hidden-view { display: block !important; }
+  }
+  @media (max-width: 768px) {
+    .view-toggle .btn-both { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .exercise-card { animation: none; }
+    .muscle-group { transition: none; }
+  }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Muscle Wiki</h1>
+    <p>Click a muscle group to explore exercises</p>
+  </header>
+
+  <div class="main">
+    <div class="diagram-section">
+      <div class="view-toggle">
+        <button class="btn-both active" onclick="setView('both')">Both</button>
+        <button class="btn-front active" onclick="setView('front')">Front</button>
+        <button class="btn-back" onclick="setView('back')">Back</button>
+      </div>
+      <div class="body-container">
+        <div class="body-svg-wrap" id="bodyWrap"></div>
+      </div>
+    </div>
+
+    <div class="exercise-panel" id="exercisePanel">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">&#x1f4aa;</div>
+        <p>Select a muscle group from the diagram to see exercises</p>
+      </div>
+      <div id="exerciseContent" hidden>
+        <div class="panel-header">
+          <h2 id="muscleTitle">Chest</h2>
+          <span class="count" id="exerciseCount"></span>
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="exercise-list" id="exerciseList"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Inspired by <a href="https://musclewiki.com" target="_blank" rel="noopener">musclewiki.com</a>
+  </footer>
+</div>
+
+<script>
+const MUSCLES = {
+  chest:      { name: 'Chest',       color: '#3b82f6', view: 'front' },
+  shoulders:  { name: 'Shoulders',   color: '#ef4444', view: 'both'  },
+  biceps:     { name: 'Biceps',      color: '#f59e0b', view: 'front' },
+  triceps:    { name: 'Triceps',     color: '#f97316', view: 'back'  },
+  forearms:   { name: 'Forearms',    color: '#84cc16', view: 'both'  },
+  abs:        { name: 'Abs',         color: '#a855f7', view: 'front' },
+  obliques:   { name: 'Obliques',    color: '#ec4899', view: 'front' },
+  lats:       { name: 'Lats',        color: '#6366f1', view: 'back'  },
+  traps:      { name: 'Traps',       color: '#d946ef', view: 'back'  },
+  lowerback:  { name: 'Lower Back',  color: '#fb923c', view: 'back'  },
+  glutes:     { name: 'Glutes',      color: '#f43f5e', view: 'back'  },
+  quads:      { name: 'Quads',       color: '#06b6d4', view: 'front' },
+  hamstrings: { name: 'Hamstrings',  color: '#14b8a6', view: 'back'  },
+  calves:     { name: 'Calves',      color: '#22c55e', view: 'both'  }
+};
+
+const EXERCISES = {
+  chest: [
+    { name: 'Barbell Bench Press', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Lie on a flat bench, grip the bar slightly wider than shoulder-width, lower to chest and press up.', secondary: ['Triceps', 'Shoulders'] },
+    { name: 'Push-ups', type: 'Compound', equip: 'Bodyweight', diff: 1, desc: 'Hands shoulder-width apart, lower your body until your chest nearly touches the floor, then push back up.', secondary: ['Triceps', 'Core'] },
+    { name: 'Dumbbell Flyes', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Lie flat holding dumbbells above chest, arms slightly bent. Open arms wide, then squeeze back together.', secondary: ['Shoulders'] },
+    { name: 'Incline Dumbbell Press', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Set bench to 30-45 degrees. Press dumbbells from shoulder height to full extension above upper chest.', secondary: ['Shoulders', 'Triceps'] },
+    { name: 'Cable Crossover', type: 'Isolation', equip: 'Cable', diff: 2, desc: 'Stand between cable stations, bring handles together in front of chest in a hugging motion.', secondary: ['Shoulders'] }
+  ],
+  shoulders: [
+    { name: 'Overhead Press', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Press the barbell from shoulder level to overhead lockout. Keep core braced throughout.', secondary: ['Triceps', 'Core'] },
+    { name: 'Lateral Raises', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Raise dumbbells out to your sides until arms are parallel with the floor. Control the descent.', secondary: [] },
+    { name: 'Face Pulls', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Pull the rope attachment toward your face, squeezing shoulder blades together at the end.', secondary: ['Traps'] },
+    { name: 'Arnold Press', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Start with palms facing you, rotate wrists outward as you press the dumbbells overhead.', secondary: ['Triceps'] },
+    { name: 'Reverse Pec Deck', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Sit facing the pad, push handles back by squeezing your rear delts.', secondary: ['Traps'] }
+  ],
+  biceps: [
+    { name: 'Barbell Curl', type: 'Isolation', equip: 'Barbell', diff: 1, desc: 'Grip the barbell underhand at shoulder width. Curl the weight up without swinging your body.', secondary: ['Forearms'] },
+    { name: 'Hammer Curl', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Curl dumbbells with a neutral grip (palms facing each other). Targets the brachialis and forearms.', secondary: ['Forearms'] },
+    { name: 'Chin-ups', type: 'Compound', equip: 'Bodyweight', diff: 2, desc: 'Grip the bar underhand, pull yourself up until your chin clears the bar.', secondary: ['Lats', 'Core'] },
+    { name: 'Incline Dumbbell Curl', type: 'Isolation', equip: 'Dumbbell', diff: 2, desc: 'Sit on an incline bench, let arms hang, then curl. The stretch at the bottom increases range of motion.', secondary: ['Forearms'] }
+  ],
+  triceps: [
+    { name: 'Tricep Dips', type: 'Compound', equip: 'Bodyweight', diff: 2, desc: 'Support yourself on parallel bars, lower until upper arms are parallel to the floor, then press up.', secondary: ['Chest', 'Shoulders'] },
+    { name: 'Tricep Pushdown', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Press the cable bar or rope down until arms are fully extended. Keep elbows pinned to your sides.', secondary: [] },
+    { name: 'Skull Crushers', type: 'Isolation', equip: 'Barbell', diff: 2, desc: 'Lie flat, lower the bar toward your forehead by bending only at the elbows, then extend back up.', secondary: [] },
+    { name: 'Overhead Tricep Extension', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Hold a dumbbell overhead with both hands, lower it behind your head, then extend back up.', secondary: [] }
+  ],
+  forearms: [
+    { name: 'Wrist Curls', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Rest forearms on your thighs, palms up, and curl the weight using only your wrists.', secondary: [] },
+    { name: 'Reverse Curls', type: 'Isolation', equip: 'Barbell', diff: 1, desc: 'Curl a barbell with an overhand grip. Strengthens the brachioradialis and wrist extensors.', secondary: ['Biceps'] },
+    { name: "Farmer's Walk", type: 'Compound', equip: 'Dumbbell', diff: 1, desc: 'Hold heavy dumbbells at your sides and walk for distance or time. Builds grip and overall stability.', secondary: ['Core', 'Traps'] }
+  ],
+  abs: [
+    { name: 'Plank', type: 'Isometric', equip: 'Bodyweight', diff: 1, desc: 'Hold a push-up position on your forearms, keeping your body in a straight line from head to heels.', secondary: ['Core'] },
+    { name: 'Hanging Leg Raises', type: 'Isolation', equip: 'Bodyweight', diff: 2, desc: 'Hang from a bar and raise your legs until they are parallel with the floor. Control the lowering.', secondary: ['Hip Flexors'] },
+    { name: 'Cable Crunches', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Kneel below a cable with rope attachment, crunch down bringing elbows toward knees.', secondary: [] },
+    { name: 'Ab Wheel Rollout', type: 'Compound', equip: 'Bodyweight', diff: 3, desc: 'Kneel and roll the wheel forward, extending your body, then pull back using your abs.', secondary: ['Shoulders', 'Lats'] }
+  ],
+  obliques: [
+    { name: 'Russian Twists', type: 'Isolation', equip: 'Bodyweight', diff: 1, desc: 'Sit with knees bent, lean back slightly, and rotate your torso side to side.', secondary: ['Abs'] },
+    { name: 'Side Plank', type: 'Isometric', equip: 'Bodyweight', diff: 1, desc: 'Support your body on one forearm and the side of one foot, keeping hips elevated.', secondary: ['Core'] },
+    { name: 'Woodchops', type: 'Isolation', equip: 'Cable', diff: 2, desc: 'Pull a cable from high to low (or low to high) in a diagonal chopping motion across your body.', secondary: ['Core', 'Shoulders'] }
+  ],
+  lats: [
+    { name: 'Pull-ups', type: 'Compound', equip: 'Bodyweight', diff: 2, desc: 'Grip the bar overhand, pull yourself up until your chin clears the bar. The gold standard for back width.', secondary: ['Biceps', 'Core'] },
+    { name: 'Barbell Row', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Hinge at the hips, pull the barbell toward your lower chest. Keep your back flat throughout.', secondary: ['Biceps', 'Lower Back'] },
+    { name: 'Lat Pulldown', type: 'Compound', equip: 'Cable', diff: 1, desc: 'Sit at the machine, pull the bar down to your upper chest, squeezing your lats at the bottom.', secondary: ['Biceps'] },
+    { name: 'Seated Cable Row', type: 'Compound', equip: 'Cable', diff: 1, desc: 'Sit upright, pull the handle toward your torso. Focus on retracting your shoulder blades.', secondary: ['Biceps', 'Traps'] }
+  ],
+  traps: [
+    { name: 'Barbell Shrugs', type: 'Isolation', equip: 'Barbell', diff: 1, desc: 'Hold a barbell at arm\'s length, shrug your shoulders straight up toward your ears.', secondary: [] },
+    { name: 'Face Pulls', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Pull the rope toward your face while externally rotating your shoulders. Great for posture.', secondary: ['Shoulders'] },
+    { name: 'Rack Pulls', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Deadlift from knee height in a power rack. Overloads the top of the pull for trap development.', secondary: ['Lower Back', 'Glutes'] }
+  ],
+  lowerback: [
+    { name: 'Hyperextensions', type: 'Isolation', equip: 'Bodyweight', diff: 1, desc: 'Position yourself in a back extension bench. Lower your torso and raise back to neutral.', secondary: ['Glutes', 'Hamstrings'] },
+    { name: 'Good Mornings', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'With a barbell on your shoulders, hinge at the hips until your torso is near-parallel, then stand.', secondary: ['Hamstrings', 'Glutes'] },
+    { name: 'Superman Hold', type: 'Isometric', equip: 'Bodyweight', diff: 1, desc: 'Lie face down, simultaneously raise your arms and legs off the floor. Hold briefly at the top.', secondary: ['Glutes'] }
+  ],
+  glutes: [
+    { name: 'Hip Thrusts', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Sit with upper back against a bench, barbell over hips. Drive hips up to full extension.', secondary: ['Hamstrings', 'Core'] },
+    { name: 'Bulgarian Split Squats', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Rear foot elevated on a bench, lower into a single-leg squat. Excellent for glute activation.', secondary: ['Quads', 'Core'] },
+    { name: 'Glute Bridge', type: 'Isolation', equip: 'Bodyweight', diff: 1, desc: 'Lie on your back, feet flat, drive hips up squeezing glutes at the top.', secondary: ['Hamstrings'] },
+    { name: 'Cable Kickbacks', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Attach an ankle strap, kick one leg straight back against the cable resistance.', secondary: ['Hamstrings'] }
+  ],
+  quads: [
+    { name: 'Barbell Squat', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Bar on upper back, squat down until thighs are parallel or below, then stand. The king of leg exercises.', secondary: ['Glutes', 'Core'] },
+    { name: 'Leg Press', type: 'Compound', equip: 'Machine', diff: 1, desc: 'Sit in the machine, push the platform away by extending your legs. Feet shoulder-width apart.', secondary: ['Glutes'] },
+    { name: 'Walking Lunges', type: 'Compound', equip: 'Dumbbell', diff: 1, desc: 'Step forward into a lunge, then bring the rear foot forward into the next step.', secondary: ['Glutes', 'Hamstrings'] },
+    { name: 'Leg Extension', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Sit in the machine and extend your legs until straight. Focus on squeezing the quads at the top.', secondary: [] }
+  ],
+  hamstrings: [
+    { name: 'Romanian Deadlift', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Hinge at the hips with soft knees, lower the bar along your legs, feel the stretch, then drive hips forward.', secondary: ['Glutes', 'Lower Back'] },
+    { name: 'Lying Leg Curl', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Lie face down, curl the pad toward your glutes by bending at the knees.', secondary: [] },
+    { name: 'Nordic Curl', type: 'Isolation', equip: 'Bodyweight', diff: 3, desc: 'Kneel with feet anchored, slowly lower your body forward using only hamstring strength.', secondary: [] },
+    { name: 'Stiff-Leg Deadlift', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Similar to Romanian deadlift but with straighter legs for a deeper hamstring stretch.', secondary: ['Glutes', 'Lower Back'] }
+  ],
+  calves: [
+    { name: 'Standing Calf Raises', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Stand on a platform edge, raise up onto your toes, then lower below the platform for full stretch.', secondary: [] },
+    { name: 'Seated Calf Raises', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Sit with the pad on your thighs, raise and lower your heels. Targets the soleus.', secondary: [] },
+    { name: 'Jump Rope', type: 'Compound', equip: 'Bodyweight', diff: 1, desc: 'Skip rope at a steady pace. Builds calf endurance and coordination while burning calories.', secondary: ['Core'] }
+  ]
+};
+
+// Figure geometry: right half only (x >= 0); every path is mirrored for the left side.
+const ARM_UPPER = 'M47,-116 C50,-110 53,-106 56,-104 C59,-104 61,-105 62,-106 C63,-100 64,-96 65,-91 C61,-88 56,-88 52,-90 C50,-98 48,-108 47,-116 Z';
+const ARM_LOWER = 'M53,-86 C57,-84 62,-84 66,-88 C69,-76 71,-60 71.5,-44 C68,-42 65,-42 63,-44 C60,-58 57,-72 53,-86 Z';
+const DELTOID = 'M40,-146 C51,-145 59,-138 60,-126 C60,-119 58,-113 55,-108 C51,-115 46,-123 43,-130 C41,-136 40,-142 40,-146 Z';
+const FIG = {
+  outline: 'M0,-172 L7,-172 C7,-162 9,-155 14,-152 C24,-149 34,-149 42,-146 C52,-144 60,-136 61,-124 C62,-112 64,-102 66,-92 C69,-80 71,-62 72,-42 C74,-34 76,-24 73,-14 C71,-9 67,-10 66,-16 C64,-24 63,-34 62,-42 C59,-58 55,-74 51,-88 C49,-98 47,-110 44,-120 C43,-108 40,-98 37,-88 C34,-78 33,-70 34,-62 C35,-54 38,-46 39,-38 C41,-20 40,0 36,22 C34,30 34,38 35,46 C38,60 36,82 30,100 C29,106 33,112 34,116 C34,120 22,120 18,117 C17,112 19,106 19,100 C17,82 16,62 16,46 C16,38 15,30 14,22 C12,0 8,-22 3,-36 L0,-37',
+  front: {
+    shoulders: [DELTOID],
+    chest: ['M2,-144 C14,-147 28,-147 38,-143 C40,-136 41,-129 41,-123 C38,-114 26,-110 14,-111 C8,-112 4,-114 2,-116 Z'],
+    biceps: [ARM_UPPER],
+    forearms: [ARM_LOWER],
+    obliques: ['M16,-106 C26,-106 34,-109 40,-114 C40,-104 38,-96 36,-88 C33,-78 32,-70 33,-62 C34,-56 35,-52 36,-48 C30,-48 22,-50 16,-56 Z'],
+    abs: [
+      'M4.5,-108 H10.5 Q13.5,-108 13.5,-105 V-98 Q13.5,-95 10.5,-95 H4.5 Q1.5,-95 1.5,-98 V-105 Q1.5,-108 4.5,-108 Z',
+      'M4.5,-93.5 H10.5 Q13.5,-93.5 13.5,-90.5 V-83.5 Q13.5,-80.5 10.5,-80.5 H4.5 Q1.5,-80.5 1.5,-83.5 V-90.5 Q1.5,-93.5 4.5,-93.5 Z',
+      'M4.5,-79 H10.5 Q13.5,-79 13.5,-76 V-69 Q13.5,-66 10.5,-66 H4.5 Q1.5,-66 1.5,-69 V-76 Q1.5,-79 4.5,-79 Z',
+      'M1.5,-64.5 L13.5,-64.5 C13.5,-56 9,-48 1.5,-43 Z'
+    ],
+    quads: ['M7,-28 C16,-30 28,-36 37,-41 C40,-22 39,0 35,18 C30,25 21,25 16,18 C14,2 11,-14 7,-28 Z'],
+    calves: ['M18,44 C24,40 32,42 35,48 C36,62 34.5,80 30,96 C27,98 23,98 20,96 C18,80 17,60 18,44 Z']
+  },
+  back: {
+    traps: ['M0,-168 L6,-168 C7,-158 11,-154 17,-151 C26,-148.5 32,-148 37,-146.5 C29,-141 20,-134 12,-124 C8,-116 4,-106 0,-98 Z'],
+    shoulders: [DELTOID],
+    lats: ['M13,-118 C21,-128 31,-134 41,-129 C43,-123 43,-118 42,-114 C40,-102 38,-94 36,-86 C30,-78 18,-74 8,-74 C8,-88 9,-104 13,-118 Z'],
+    lowerback: ['M1.5,-92 C4,-86 6,-78 7,-70 C18,-70 28,-73 33,-78 C32,-70 33,-62 34,-56 C24,-54 12,-52 1.5,-50 Z'],
+    triceps: [ARM_UPPER],
+    forearms: [ARM_LOWER],
+    glutes: ['M2,-47 C14,-50 28,-52 35,-50 C38,-42 39,-32 37,-24 C30,-15 16,-16 8,-22 C5,-30 2.5,-38 2,-47 Z'],
+    hamstrings: ['M9,-16 C18,-11 30,-11 37,-19 C39,-6 38,8 35,20 C30,25 21,25 16,20 C14,6 12,-6 9,-16 Z'],
+    calves: ['M18,40 C23,36 32,36 35.5,43 C36.5,52 36,68 32,78 C29,84 27,91 26,98 L23,98 C22,91 20,84 18.5,78 C16.5,66 16.5,52 18,40 Z']
+  }
+};
+
+function mirror(d) {
+  return `<path d="${d}"/><path d="${d}" transform="scale(-1,1)"/>`;
+}
+
+function figureBase(body) {
+  return `<g class="body-base" fill="${body}">
+    ${mirror(FIG.outline)}
+    <rect x="-1.5" y="-172" width="3" height="134"/>
+  </g>`;
+}
+
+function figureLines(body, line) {
+  return `<g class="body-base" fill="none" stroke="${line}" stroke-width="1.2" stroke-linejoin="round">
+    ${mirror(FIG.outline)}
+    <ellipse cx="0" cy="-184" rx="14" ry="17.5" fill="${body}"/>
+  </g>`;
+}
+
+function muscleShapes(view, body) {
+  return Object.entries(FIG[view]).map(([key, paths]) => {
+    const m = MUSCLES[key];
+    return `<g class="muscle-group" data-muscle="${key}" tabindex="0" role="button" aria-label="${m.name}" style="--glow-color:${m.color}" fill="${m.color}" stroke="${body}" stroke-width="1.1" stroke-linejoin="round" opacity="0.9"><title>${m.name}</title>${paths.map(mirror).join('')}</g>`;
+  }).join('');
+}
+
+function buildLabel(text, color, tx, ty, lx, ly) {
+  return `<g font-family="Inter, sans-serif" font-size="10" font-weight="600" pointer-events="none">
+    <text x="${tx}" y="${ty}" text-anchor="${tx < 0 ? 'end' : 'start'}" fill="${color}">${text}</text>
+    <line x1="${tx < 0 ? tx+4 : tx-4}" y1="${ty-3}" x2="${lx}" y2="${ly}" stroke="${color}" stroke-width="0.7" opacity="0.55"/>
+    <circle cx="${lx}" cy="${ly}" r="1.8" fill="${color}"/>
+  </g>`;
+}
+
+function buildSVG(view) {
+  const cs = getComputedStyle(document.documentElement);
+  const body = cs.getPropertyValue('--body').trim() || '#ebe9e3';
+  const line = cs.getPropertyValue('--body-line').trim() || '#c9c5bc';
+
+  const labels = view === 'front' ? [
+    buildLabel('Shoulders', MUSCLES.shoulders.color, -84, -148, -52, -134),
+    buildLabel('Biceps',    MUSCLES.biceps.color,    -84, -104, -57, -98),
+    buildLabel('Forearms',  MUSCLES.forearms.color,  -84, -62,  -66, -64),
+    buildLabel('Quads',     MUSCLES.quads.color,     -84,  2,   -27, -6),
+    buildLabel('Chest',     MUSCLES.chest.color,      84, -134,  24, -130),
+    buildLabel('Obliques',  MUSCLES.obliques.color,   84, -96,   30, -86),
+    buildLabel('Abs',       MUSCLES.abs.color,        84, -74,   8,  -72),
+    buildLabel('Calves',    MUSCLES.calves.color,     84,  70,   30,  68),
+  ] : [
+    buildLabel('Traps',      MUSCLES.traps.color,     -84, -156, -14, -146),
+    buildLabel('Lats',       MUSCLES.lats.color,      -84, -122, -28, -108),
+    buildLabel('Triceps',    MUSCLES.triceps.color,   -84, -98,  -57, -98),
+    buildLabel('Lower Back', MUSCLES.lowerback.color, -84, -60,  -16, -62),
+    buildLabel('Shoulders',  MUSCLES.shoulders.color,  84, -148,  52, -134),
+    buildLabel('Forearms',   MUSCLES.forearms.color,   84, -66,   66, -64),
+    buildLabel('Glutes',     MUSCLES.glutes.color,     84, -30,   22, -36),
+    buildLabel('Hamstrings', MUSCLES.hamstrings.color, 84,  6,    28,  2),
+    buildLabel('Calves',     MUSCLES.calves.color,     84,  64,   30,  60),
+  ];
+
+  const viewLabel = view === 'front' ? 'FRONT' : 'BACK';
+
+  return `<svg viewBox="-150 -222 300 355" xmlns="http://www.w3.org/2000/svg" id="svg-${view}" role="group" aria-label="${viewLabel.toLowerCase()} view">
+    <text x="0" y="-210" text-anchor="middle" fill="${cs.getPropertyValue('--fg-tertiary').trim() || '#6b6b6b'}" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="600" letter-spacing="2">${viewLabel}</text>
+    ${figureBase(body)}
+    ${muscleShapes(view, body)}
+    ${figureLines(body, line)}
+    ${labels.join('')}
+  </svg>`;
+}
+
+// ---- Exercise demos ----
+// A jointed figure in a 200x160 space with the floor at y=148. Each demo gives two poses (b inherits
+// from a) and an optional mid pose m for movements that travel on an arc. Hands and feet are targets; elbows and knees are solved with two-bone IK.
+// v: 's' side view facing right, 'f' front view. Pose keys: h hip, t torso lean (deg), hd/ft hand and
+// ankle targets (hd2/ft2 for the other limb), eb/kb bend side, fa foot angle, hn head tilt,
+// ts/as/ls torso, arm and leg foreshortening, sw shoulder width scale, sy shrug, ho head offset.
+const BONE = { torso: 34, upper: 19, fore: 18, thigh: 27, shin: 27, foot: 9, head: 7.5, sw: 15, hw: 7 };
+const POSE_DEFAULTS = { t: 0, fa: 0, hn: 0, ts: 1, sw: 1, sy: 0, ho: 12, as: 1, ls: 1 };
+const BEND_KEYS = new Set(['eb', 'kb', 'eb2', 'kb2']);
+const FRONT_PROPS = new Set(['plate', 'db', 'wheel', 'ball', 'wrist', 'barF', 'roller', 'sled', 'rope']);
+const SEGMENT = {
+  chest: 'torso', abs: 'torso', obliques: 'torso', lats: 'torso', traps: 'torso', lowerback: 'torso',
+  shoulders: 'shoulder', biceps: 'upper', triceps: 'upper', forearms: 'fore',
+  glutes: 'hip', quads: 'thigh', hamstrings: 'thigh', calves: 'shin'
+};
+const BENCH = [['rect', 54, 106, 74, 5], ['line', 64, 111, 64, 148, 3], ['line', 118, 111, 118, 148, 3]];
+
+const DEMOS = {
+  // Chest
+  'Barbell Bench Press': { v: 's', a: { h: [112, 102], t: -90, hd: [80, 92], ft: [136, 145] }, b: { hd: [79, 66] }, props: [...BENCH, ['plate', 10]] },
+  'Push-ups': { v: 's', a: { h: [88, 122.5], t: 68, hd: [122, 146], ft: [38, 140], fa: 80 }, b: { h: [92, 137], t: 87 } },
+  'Dumbbell Flyes': { v: 'f', a: { h: [100, 108], ts: 0.15, ho: 2, ls: 0.72, hd: [114, 67], ft: [112, 145] }, m: { hd: [141, 78] }, b: { hd: [150, 101] }, props: [['rect', 86, 104, 28, 8], ['line', 90, 112, 90, 148, 3], ['line', 110, 112, 110, 148, 3], ['db']] },
+  'Incline Dumbbell Press': { v: 's', a: { h: [112, 118], t: -50, hd: [90, 86], ft: [138, 145] }, b: { hd: [88, 60] }, props: [['line', 111, 125, 65, 87, 5], ['line', 109, 126, 126, 126, 5], ['line', 96, 114, 96, 148, 3], ['db']] },
+  'Cable Crossover': { v: 'f', a: { h: [100, 91], hd: [142, 66], ft: [110, 145] }, b: { hd: [103, 92] }, props: [['line', 172, 20, 172, 148, 3], ['line', 28, 20, 28, 148, 3], ['cable', 170, 24, 'hands']] },
+  // Shoulders
+  'Overhead Press': { v: 's', a: { h: [100, 91], hd: [107, 58], ft: [100, 145] }, b: { hd: [102, 21] }, props: [['plate', 10]] },
+  'Lateral Raises': { v: 'f', a: { h: [100, 91], hd: [120, 93], ft: [107, 145] }, m: { hd: [141, 82] }, b: { hd: [150, 60] }, props: [['db']] },
+  'Face Pulls': { v: 's', a: { h: [98, 91], t: -4, hd: [132, 58], ft: [100, 145], eb: -1 }, b: { h: [97, 91], t: -8, hd: [105, 47], as: 0.75 }, props: [['line', 170, 20, 170, 148, 3], ['cable', 168, 44, 'hand']] },
+  'Arnold Press': { v: 'f', a: { h: [100, 91], hd: [108, 62], ft: [107, 145] }, b: { hd: [116, 20] }, props: [['db']] },
+  'Reverse Pec Deck': { v: 'f', a: { h: [100, 112], ls: 0.62, hd: [106, 84], ft: [108, 145] }, b: { hd: [151, 80] }, props: [['rect', 95, 40, 10, 108], ['rect', 84, 114, 32, 5]] },
+  // Biceps
+  'Barbell Curl': { v: 's', a: { h: [100, 91], hd: [106, 93], ft: [100, 145] }, m: { hd: [117, 78] }, b: { hd: [110, 62] }, props: [['plate', 8]] },
+  'Hammer Curl': { v: 's', a: { h: [100, 91], hd: [110, 62], hd2: [104, 93], ft: [100, 145] }, b: { hd: [104, 93], hd2: [110, 62] }, props: [['db']] },
+  'Chin-ups': { v: 's', a: { h: [100, 89], hd: [104, 18], ft: [88, 132] }, b: { h: [98, 60], t: 4, ft: [86, 104] }, props: [['line', 104, 4, 104, 14, 2], ['circle', 104, 16, 3]] },
+  'Incline Dumbbell Curl': { v: 's', a: { h: [108, 120], t: -35, hd: [88, 128], ft: [134, 145] }, b: { hd: [101, 98] }, props: [['line', 105, 127, 72, 79, 5], ['line', 104, 127, 122, 127, 5], ['line', 92, 110, 92, 148, 3], ['db']] },
+  // Triceps
+  'Tricep Dips': { v: 's', a: { h: [98, 93], t: 3, hd: [100, 96], ft: [84, 134] }, b: { h: [92, 112], t: 15, ft: [76, 140] }, props: [['line', 74, 99, 126, 99, 3], ['line', 80, 99, 80, 148, 3], ['line', 120, 99, 120, 148, 3]] },
+  'Tricep Pushdown': { v: 's', a: { h: [98, 91], t: 6, hd: [117, 70], ft: [100, 145] }, b: { hd: [105, 93] }, props: [['line', 134, 10, 134, 148, 3], ['cable', 132, 14, 'hand']] },
+  'Skull Crushers': { v: 's', a: { h: [112, 102], t: -90, hd: [62, 91], ft: [136, 145] }, b: { hd: [78, 65] }, props: [...BENCH, ['plate', 7]] },
+  'Overhead Tricep Extension': { v: 's', a: { h: [100, 91], hd: [89, 49], ft: [100, 145] }, b: { hd: [101, 20.5] }, props: [['db']] },
+  // Forearms
+  'Wrist Curls': { v: 's', a: { h: [88, 112], t: 25, hd: [119, 110], ft: [118, 145] }, b: {}, props: [['rect', 70, 116, 36, 5], ['line', 76, 121, 76, 148, 3], ['line', 100, 121, 100, 148, 3], ['wrist', 55, -40]] },
+  'Reverse Curls': { v: 's', a: { h: [100, 91], hd: [106, 93], ft: [100, 145] }, m: { hd: [117, 78] }, b: { hd: [111, 64] }, props: [['plate', 7]] },
+  "Farmer's Walk": { v: 's', a: { h: [100, 93], t: 2, hd: [102, 97], ft: [114, 145], ft2: [86, 143], fa2: 25 }, b: { ft: [86, 143], ft2: [114, 145], fa: 25, fa2: 0 }, props: [['db']], dur: 1500 },
+  // Abs
+  'Plank': { v: 's', a: { h: [86.4, 132.5], t: 80.7, hd: [138, 146], ft: [34, 141], fa: 80 }, b: { h: [86.4, 131], t: 81.5 }, dur: 4000 },
+  'Hanging Leg Raises': { v: 's', a: { h: [100, 89], hd: [100, 18], ft: [102, 142], fa: 20 }, m: { ft: [135, 126] }, b: { h: [96, 89], t: -4, ft: [149, 86], fa: -80 }, props: [['line', 100, 4, 100, 14, 2], ['circle', 100, 16, 3]] },
+  'Cable Crunches': { v: 's', a: { h: [97, 120], t: 10, hd: [108, 78], ft: [78, 144], fa: 180 }, b: { h: [94, 121], t: 75, hd: [136, 103] }, props: [['line', 150, 6, 150, 148, 3], ['line', 128, 8, 150, 8, 3], ['cable', 128, 10, 'hand']] },
+  'Ab Wheel Rollout': { v: 's', a: { h: [80, 119], t: 65, hd: [112, 140], ft: [58, 145], fa: 180 }, b: { h: [108.5, 134.7], t: 82, hd: [176, 140] }, props: [['wheel', 8]] },
+  // Obliques
+  'Russian Twists': { v: 'f', a: { h: [100, 130], t: -14, ts: 0.8, ls: 0.62, sw: 0.75, hd: [74, 118], hd2: [74, 118], ft: [112, 140] }, b: { t: 14, hd: [126, 118], hd2: [126, 118] }, props: [['ball', 5]], dur: 2000 },
+  'Side Plank': { v: 's', a: { h: [86.4, 131], t: 80.7, hd: [138, 146], hd2: [122, 92], ft: [34, 141], fa: 80 }, b: { h: [86.4, 135.5], t: 83 }, dur: 3200 },
+  'Woodchops': { v: 'f', a: { h: [100, 91], t: -14, sw: 0.6, hd: [74, 40], hd2: [74, 40], ft: [114, 145] }, b: { t: 12, hd: [116, 90], hd2: [116, 90] }, props: [['line', 24, 10, 24, 148, 3], ['cable', 26, 18, 'hand']] },
+  // Lats
+  'Pull-ups': { v: 'f', a: { h: [100, 88], hd: [122, 18], ft: [106, 141.5] }, b: { h: [100, 62], ft: [106, 115.5] }, props: [['line', 44, 16, 156, 16, 3]] },
+  'Barbell Row': { v: 's', a: { h: [88, 96], t: 62, hd: [120, 116], ft: [96, 145] }, b: { hd: [106, 92] }, props: [['plate', 10]] },
+  'Lat Pulldown': { v: 'f', a: { h: [100, 118], ls: 0.52, hd: [124, 49], ft: [108, 145] }, b: { hd: [124, 78] }, props: [['rect', 84, 120, 32, 5], ['barF', 10, false, true]] },
+  'Seated Cable Row': { v: 's', a: { h: [70, 124], t: 12, hd: [112, 100], ft: [118, 128], fa: -70 }, b: { t: -6, hd: [82, 105] }, props: [['rect', 52, 128, 42, 5], ['line', 58, 133, 58, 148, 3], ['line', 88, 133, 88, 148, 3], ['line', 124, 114, 124, 140, 4], ['line', 154, 60, 154, 148, 3], ['cable', 152, 108, 'hand']] },
+  // Traps
+  'Barbell Shrugs': { v: 'f', a: { h: [100, 91], hd: [119, 93], ft: [107, 145] }, b: { sy: -7, hd: [119, 86] }, props: [['barF', 22, true, false]], dur: 2000 },
+  'Rack Pulls': { v: 's', a: { h: [86, 98], t: 45, hd: [112, 110], ft: [98, 145] }, b: { h: [98, 91], t: -2, hd: [104, 93] }, props: [['line', 128, 70, 128, 148, 3], ['line', 104, 123, 128, 123, 3], ['plate', 11]] },
+  // Lower back
+  'Hyperextensions': { v: 's', a: { h: [96, 102], t: 135, hd: [113, 119], ft: [60, 140], fa: 60, eb: -1 }, b: { t: 45, hd: [113, 85] }, props: [['line', 88, 116, 104, 102, 6], ['line', 97, 112, 97, 148, 3], ['line', 57, 136, 80, 148, 3], ['circle', 57, 136, 3.5]] },
+  'Good Mornings': { v: 's', a: { h: [98, 91], hd: [95, 57], ft: [100, 145], eb: -1 }, b: { h: [88, 96], t: 70, hd: [119, 81.6] }, props: [['plate', 9]] },
+  'Superman Hold': { v: 's', a: { h: [96, 140], t: 88, hd: [166, 142], ft: [43, 142], fa: 180 }, b: { h: [96, 141], t: 74, hd: [163, 122], ft: [45, 129], fa: 190 }, dur: 3600 },
+  // Glutes
+  'Hip Thrusts': { v: 's', a: { h: [96, 128], t: -54.5, hd: [100, 125], ft: [128, 145] }, b: { h: [100, 106], t: -93.5, hd: [102, 104] }, props: [['rect', 38, 112, 34, 6], ['line', 44, 118, 44, 148, 3], ['line', 66, 118, 66, 148, 3], ['plate', 10]] },
+  'Bulgarian Split Squats': { v: 's', a: { h: [92, 96], t: 8, hd: [98, 99], ft: [112, 145], ft2: [58, 114], fa2: 150 }, b: { h: [90, 116], t: 10, hd: [96, 119] }, props: [['rect', 40, 119, 30, 5], ['line', 46, 124, 46, 148, 3], ['line', 64, 124, 64, 148, 3], ['db']] },
+  'Glute Bridge': { v: 's', a: { h: [90, 141], t: -90, hd: [92, 144], ft: [118, 145] }, b: { h: [81, 118], t: -132.6, hn: 42.6 } },
+  'Cable Kickbacks': { v: 's', a: { h: [96, 92], t: 18, hd: [128, 70], ft: [108, 143], ft2: [104, 145], fa2: 0 }, b: { t: 20, ft: [66, 128], fa: 60 }, props: [['line', 134, 20, 134, 148, 3], ['cable', 132, 142, 'foot']] },
+  // Quads
+  'Barbell Squat': { v: 's', a: { h: [98, 91], t: 3, hd: [96.8, 56], ft: [102, 145], eb: -1 }, b: { h: [86, 120], t: 38, hd: [104.5, 91.3] }, props: [['plate', 11]] },
+  'Leg Press': { v: 's', a: { h: [70, 126], t: -55, hd: [74, 118], ft: [104, 104], fa: -55 }, b: { ft: [112, 95] }, props: [['line', 68, 132, 30, 105, 5], ['line', 66, 132, 84, 134, 5], ['line', 88, 136, 152, 88, 2], ['sled']] },
+  'Walking Lunges': { v: 's', a: { h: [100, 91], hd: [102, 93], ft: [100, 145], ft2: [100, 145], fa2: 0 }, b: { h: [98, 112], t: 4, hd: [100, 114], ft: [124, 145], ft2: [72, 141], fa2: 70 }, props: [['db']] },
+  'Leg Extension': { v: 's', a: { h: [78, 108], t: -12, hd: [80, 110], ft: [103, 135] }, m: { ft: [124, 127] }, b: { ft: [131, 104], fa: -60 }, props: [['rect', 64, 112, 42, 5], ['line', 68, 114, 60, 72, 5], ['line', 84, 117, 84, 148, 3], ['roller', 'an', 5, -2, 105, 112, 2, -6]] },
+  // Hamstrings
+  'Romanian Deadlift': { v: 's', a: { h: [98, 91], hd: [104, 93], ft: [100, 145] }, b: { h: [88, 95], t: 72, hd: [112, 120] }, props: [['plate', 11]] },
+  'Lying Leg Curl': { v: 's', a: { h: [96, 106], t: 90, hd: [122, 124], ft: [43, 107], fa: 120, eb: -1 }, m: { ft: [47, 91.5] }, b: { ft: [60, 82], fa: 210 }, props: [['rect', 60, 110, 74, 5], ['line', 70, 115, 70, 148, 3], ['line', 124, 115, 124, 148, 3], ['roller', 'an', 0, -6, 69, 113, 6, 0]] },
+  'Nordic Curl': { v: 's', a: { h: [70, 119], hd: [78, 92], ft: [44, 145], fa: 180 }, b: { h: [92.1, 130.5], t: 55, hd: [140, 140] }, props: [['rect', 36, 136, 14, 4], ['line', 40, 140, 40, 148, 3]], dur: 3400 },
+  'Stiff-Leg Deadlift': { v: 's', a: { h: [98, 91], hd: [103, 93], ft: [100, 145] }, b: { h: [90, 93], t: 85, hd: [122, 126] }, props: [['db']] },
+  // Calves
+  'Standing Calf Raises': { v: 's', a: { h: [98, 87], hd: [104, 50], ft: [98, 141], fa: 5 }, b: { h: [98, 77], hd: [104, 40], ft: [99, 131], fa: 50 }, props: [['rect', 94, 145, 22, 3], ['line', 66, 20, 66, 148, 3], ['roller', 'sh', 0, -8, 66, 56]], dur: 2000 },
+  'Seated Calf Raises': { v: 's', a: { h: [76, 112], t: 5, hd: [100, 103], ft: [104, 140], fa: 5 }, b: { hd: [99, 97], ft: [104, 134], fa: 45 }, props: [['rect', 60, 116, 30, 5], ['line', 66, 121, 66, 148, 3], ['rect', 98, 145, 20, 3], ['line', 140, 96, 140, 148, 3], ['roller', 'kn', 0, -7, 140, 96]], dur: 2000 },
+  'Jump Rope': { v: 's', a: { h: [100, 91], t: 2, hd: [107, 93], ft: [100, 145], fa: 10 }, b: { h: [100, 82], hd: [107, 84], ft: [101, 136], fa: 55 }, props: [['rope']], dur: 800 }
+};
+
+function poseAt(demo, e) {
+  if (!demo.m) return mixPose(demo.a, demo.b, e);
+  const mid = { ...mixPose(demo.a, demo.b, 0.5), ...demo.m };
+  return e < 0.5 ? mixPose(demo.a, mid, e * 2) : mixPose(mid, mixPose(demo.a, demo.b, 1), e * 2 - 1);
+}
+
+function mixPose(a, b, e) {
+  const out = {};
+  for (const k of new Set([...Object.keys(a), ...Object.keys(b)])) {
+    if (BEND_KEYS.has(k)) { out[k] = a[k] ?? b[k]; continue; }
+    const base = k.endsWith('2') ? k.slice(0, -1) : k;
+    const x = a[k] ?? a[base] ?? POSE_DEFAULTS[base];
+    const y = b[k] ?? x;
+    out[k] = Array.isArray(x) ? [x[0] + (y[0] - x[0]) * e, x[1] + (y[1] - x[1]) * e] : x + (y - x) * e;
+  }
+  return { ...POSE_DEFAULTS, ...out };
+}
+
+// Two-bone IK: returns [joint, end]. pick: 1 / -1 choose a side of the root-to-target line,
+// 'down' the lower joint, 'out' the one farther from the body's centre line cx.
+function ik(s, t, l1, l2, pick, cx) {
+  const dx = t[0] - s[0], dy = t[1] - s[1];
+  const d = Math.hypot(dx, dy) || 0.001;
+  const ux = dx / d, uy = dy / d;
+  const r = Math.min(Math.max(d, Math.abs(l1 - l2) + 0.01), l1 + l2 - 0.01);
+  const a = (l1 * l1 - l2 * l2 + r * r) / (2 * r);
+  const h = Math.sqrt(Math.max(l1 * l1 - a * a, 0));
+  const m = [s[0] + ux * a, s[1] + uy * a];
+  const p = [m[0] - uy * h, m[1] + ux * h], q = [m[0] + uy * h, m[1] - ux * h];
+  let j;
+  if (pick === 'down') j = p[1] >= q[1] ? p : q;
+  else if (pick === 'out') j = Math.abs(p[0] - cx) >= Math.abs(q[0] - cx) ? p : q;
+  else j = pick === -1 ? q : p;
+  return [j, [s[0] + ux * r, s[1] + uy * r]];
+}
+
+function joints(view, p) {
+  const rad = Math.PI / 180;
+  const sc = [p.h[0] + Math.sin(p.t * rad) * BONE.torso * p.ts, p.h[1] - Math.cos(p.t * rad) * BONE.torso * p.ts];
+  const ua = BONE.upper * p.as, fo = BONE.fore * p.as, th = BONE.thigh * p.ls, sn = BONE.shin * p.ls;
+  if (view === 's') {
+    const ha = (p.t + p.hn) * rad;
+    const toe = (an, deg) => [an[0] + Math.cos(deg * rad) * BONE.foot, an[1] + Math.sin(deg * rad) * BONE.foot];
+    const [e1, w1] = ik(sc, p.hd, ua, fo, p.eb ?? 1);
+    const [e2, w2] = ik(sc, p.hd2 ?? p.hd, ua, fo, p.eb2 ?? p.eb ?? 1);
+    const [k1, a1] = ik(p.h, p.ft, th, sn, p.kb ?? -1);
+    const [k2, a2] = ik(p.h, p.ft2 ?? p.ft, th, sn, p.kb2 ?? p.kb ?? -1);
+    return {
+      head: [sc[0] + Math.sin(ha) * p.ho, sc[1] - Math.cos(ha) * p.ho],
+      sh: [sc, sc], hip: [p.h, p.h], el: [e1, e2], wr: [w1, w2], kn: [k1, k2], an: [a1, a2],
+      toe: [toe(a1, p.fa), toe(a2, p.fa2 ?? p.fa)]
+    };
+  }
+  const cx = p.h[0], sw = BONE.sw * p.sw;
+  const mir = v => [2 * cx - v[0], v[1]];
+  const sR = [sc[0] + sw, sc[1] + p.sy], sL = [sc[0] - sw, sc[1] + p.sy];
+  const hR = [cx + BONE.hw, p.h[1]], hL = [cx - BONE.hw, p.h[1]];
+  const [e1, w1] = ik(sR, p.hd, ua, fo, p.eb ?? 'down', cx);
+  const [e2, w2] = ik(sL, p.hd2 ?? mir(p.hd), ua, fo, p.eb ?? 'down', cx);
+  const [k1, a1] = ik(hR, p.ft, th, sn, p.kb ?? 'out', cx);
+  const [k2, a2] = ik(hL, p.ft2 ?? mir(p.ft), th, sn, p.kb ?? 'out', cx);
+  return {
+    head: [sc[0], sc[1] - p.ho], sh: [sR, sL], hip: [hR, hL], el: [e1, e2], wr: [w1, w2], kn: [k1, k2], an: [a1, a2],
+    toe: [[a1[0] + 5, a1[1] + 2], [a2[0] - 5, a2[1] + 2]]
+  };
+}
+
+function strokeLine(ctx, a, b, w, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = w;
+  ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+}
+function fillDot(ctx, c, r, color) {
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2); ctx.fill();
+}
+function ring(ctx, c, r, w, color) {
+  ctx.strokeStyle = color; ctx.lineWidth = w; ctx.beginPath(); ctx.arc(c[0], c[1], r, 0, Math.PI * 2); ctx.stroke();
+}
+
+function drawProp(ctx, pr, J, e, u, th, side) {
+  const [kind, a, b, c, d, f] = pr;
+  if (kind === 'rect') { ctx.fillStyle = th.prop; ctx.fillRect(a, b, c, d); }
+  else if (kind === 'line') strokeLine(ctx, [a, b], [c, d], f, th.prop);
+  else if (kind === 'circle') fillDot(ctx, [a, b], c, th.prop);
+  else if (kind === 'cable') {
+    const ends = c === 'hands' ? [[[a, b], J.wr[0]], [[200 - a, b], J.wr[1]]] : [[[a, b], c === 'foot' ? J.an[0] : J.wr[0]]];
+    for (const [from, to] of ends) { strokeLine(ctx, from, to, 1.3, th.prop); fillDot(ctx, from, 3, th.prop); }
+  }
+  else if (kind === 'plate') { ring(ctx, J.wr[0], a, 3.5, th.prop); fillDot(ctx, J.wr[0], 2, th.prop); }
+  else if (kind === 'wheel') { ring(ctx, J.wr[0], a - 1.5, 3, th.prop); fillDot(ctx, J.wr[0], 1.8, th.prop); }
+  else if (kind === 'ball') fillDot(ctx, J.wr[0], a, th.prop);
+  else if (kind === 'db') {
+    for (const w of J.wr) {
+      if (side) fillDot(ctx, w, 4.2, th.prop);
+      else strokeLine(ctx, [w[0] - 4.5, w[1]], [w[0] + 4.5, w[1]], 5.5, th.prop);
+    }
+  }
+  else if (kind === 'wrist') {
+    const ang = (a + (b - a) * e) * Math.PI / 180, w = J.wr[0];
+    const tip = [w[0] + Math.cos(ang) * 7, w[1] + Math.sin(ang) * 7];
+    strokeLine(ctx, w, tip, 4.5, th.fig);
+    fillDot(ctx, tip, 4.2, th.prop);
+  }
+  else if (kind === 'barF') {
+    const l = J.wr[1], r = J.wr[0];
+    strokeLine(ctx, [l[0] - a, l[1]], [r[0] + a, r[1]], 2.6, th.prop);
+    if (b) { ctx.fillStyle = th.prop; ctx.fillRect(l[0] - a - 2, l[1] - 9, 4.5, 18); ctx.fillRect(r[0] + a - 2.5, r[1] - 9, 4.5, 18); }
+    if (c) strokeLine(ctx, [(l[0] + r[0]) / 2, l[1]], [(l[0] + r[0]) / 2, 4], 1.3, th.prop);
+  }
+  else if (kind === 'roller') {
+    const [, joint, ox, oy, px, py, ox2 = ox, oy2 = oy] = pr;
+    const at = [J[joint][0][0] + ox + (ox2 - ox) * e, J[joint][0][1] + oy + (oy2 - oy) * e];
+    strokeLine(ctx, [px, py], at, 2.4, th.prop);
+    fillDot(ctx, at, 4, th.prop);
+  }
+  else if (kind === 'sled') {
+    const m = [J.an[0][0] + 0.8 * 8, J.an[0][1] - 0.6 * 8];
+    strokeLine(ctx, [m[0] - 0.6 * 14, m[1] - 0.8 * 14], [m[0] + 0.6 * 14, m[1] + 0.8 * 14], 4.5, th.prop);
+  }
+  else if (kind === 'rope') {
+    const w = J.wr[0], swing = Math.cos(2 * Math.PI * u);
+    const reach = swing > 0 ? swing * 66 : swing * (151 - w[1]);
+    ctx.strokeStyle = th.prop; ctx.lineWidth = 1.3;
+    ctx.beginPath(); ctx.ellipse(w[0] - 7, w[1] - reach / 2, 15, Math.max(Math.abs(reach) / 2, 0.5), 0, 0, Math.PI * 2); ctx.stroke();
+  }
+}
+
+function drawDemo(ctx, demo, u, muscle, th) {
+  const e = (1 - Math.cos(2 * Math.PI * u)) / 2;
+  const J = joints(demo.v, poseAt(demo, e));
+  const seg = SEGMENT[muscle], mc = MUSCLES[muscle].color, side = demo.v === 's';
+  const props = demo.props || [];
+  ctx.clearRect(0, 0, 200, 160);
+  ctx.lineCap = ctx.lineJoin = 'round';
+  strokeLine(ctx, [8, 150.5], [192, 150.5], 1.5, th.floor);
+  for (const pr of props) if (!FRONT_PROPS.has(pr[0])) drawProp(ctx, pr, J, e, u, th, side);
+
+  const bone = (a, b, w, name, far) => {
+    const hit = name === seg;
+    ctx.globalAlpha = hit && far ? 0.5 : 1;
+    strokeLine(ctx, a, b, w, hit ? mc : far ? th.far : th.fig);
+    ctx.globalAlpha = 1;
+  };
+  const leg = (i, far) => { bone(J.hip[i], J.kn[i], 7, 'thigh', far); bone(J.kn[i], J.an[i], 6, 'shin', far); bone(J.an[i], J.toe[i], 5, 'foot', far); };
+  const arm = (i, far) => { bone(J.sh[i], J.el[i], 6, 'upper', far); bone(J.el[i], J.wr[i], 5.5, 'fore', far); };
+
+  if (side) {
+    leg(1, true); arm(1, true);
+    bone(J.hip[0], J.sh[0], 10, 'torso');
+    fillDot(ctx, J.head, BONE.head, th.fig);
+    leg(0); arm(0);
+  } else {
+    leg(0); leg(1);
+    ctx.fillStyle = ctx.strokeStyle = seg === 'torso' ? mc : th.fig;
+    ctx.lineWidth = 7;
+    ctx.beginPath(); ctx.moveTo(...J.sh[0]); ctx.lineTo(...J.sh[1]); ctx.lineTo(...J.hip[1]); ctx.lineTo(...J.hip[0]); ctx.closePath();
+    ctx.fill(); ctx.stroke();
+    fillDot(ctx, J.head, BONE.head, th.fig);
+    arm(0); arm(1);
+  }
+  if (seg === 'shoulder') J.sh.forEach(s => fillDot(ctx, s, 5.5, mc));
+  if (seg === 'hip') J.hip.forEach(h => fillDot(ctx, h, 7, mc));
+  for (const pr of props) if (FRONT_PROPS.has(pr[0])) drawProp(ctx, pr, J, e, u, th, side);
+}
+
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
+let THEME = {};
+let demoItems = [];
+let demoFrame = 0;
+
+function readTheme() {
+  const cs = getComputedStyle(document.documentElement);
+  const v = name => cs.getPropertyValue(name).trim();
+  THEME = { fig: v('--fig'), far: v('--fig-far'), prop: v('--prop'), floor: v('--border') };
+}
+
+function paintDemo(item) { drawDemo(item.ctx, item.demo, item.u, item.muscle, THEME); }
+
+function syncDemoButton(item) {
+  item.btn.classList.toggle('paused', !item.playing);
+  item.btn.setAttribute('aria-label', `${item.playing ? 'Pause' : 'Play'} ${item.name} demo`);
+}
+
+function demoTick(now) {
+  demoFrame = 0;
+  let running = false;
+  for (const item of demoItems) {
+    if (!item.playing) continue;
+    item.u = ((now - item.t0) / item.dur) % 1;
+    paintDemo(item);
+    running = true;
+  }
+  if (running) demoFrame = requestAnimationFrame(demoTick);
+}
+
+function startDemos() { if (!demoFrame) demoFrame = requestAnimationFrame(demoTick); }
+
+function setupDemos(list, exercises) {
+  demoItems = [...list.querySelectorAll('.demo')].map(btn => {
+    const ex = exercises[+btn.dataset.i];
+    const demo = DEMOS[ex.name];
+    const ctx = btn.querySelector('canvas').getContext('2d');
+    ctx.setTransform(2, 0, 0, 2, 0, 0);
+    const still = reduceMotion.matches;
+    const item = { btn, ctx, demo, name: ex.name, muscle: selectedMuscle, dur: demo.dur || 2600, u: still ? 0.5 : 0, playing: !still, t0: performance.now() };
+    btn.addEventListener('click', () => {
+      item.playing = !item.playing;
+      if (item.playing) item.t0 = performance.now() - item.u * item.dur;
+      syncDemoButton(item);
+      startDemos();
+    });
+    syncDemoButton(item);
+    paintDemo(item);
+    return item;
+  });
+  startDemos();
+}
+
+// State
+let selectedMuscle = null;
+let activeFilter = 'All';
+let currentView = window.innerWidth <= 768 ? 'front' : 'both';
+
+function render() {
+  readTheme();
+  demoItems.forEach(paintDemo);
+  const wrap = document.getElementById('bodyWrap');
+  wrap.innerHTML = buildSVG('front') + buildSVG('back');
+
+  if (currentView === 'front') {
+    document.getElementById('svg-back')?.classList.add('hidden-view');
+  } else if (currentView === 'back') {
+    document.getElementById('svg-front')?.classList.add('hidden-view');
+  }
+
+  wrap.querySelectorAll('.muscle-group').forEach(g => {
+    g.addEventListener('click', () => selectMuscle(g.dataset.muscle));
+    g.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectMuscle(g.dataset.muscle); }
+    });
+    g.addEventListener('mouseenter', () => {
+      if (!selectedMuscle) highlightMuscle(g.dataset.muscle, true);
+    });
+    g.addEventListener('mouseleave', () => {
+      if (!selectedMuscle) highlightMuscle(null, false);
+    });
+  });
+
+  if (selectedMuscle) applySelection();
+}
+
+function highlightMuscle(muscle, hover) {
+  document.querySelectorAll('.muscle-group').forEach(g => {
+    if (hover && muscle) {
+      g.classList.toggle('dimmed', g.dataset.muscle !== muscle);
+    } else {
+      g.classList.remove('dimmed');
+    }
+  });
+}
+
+function selectMuscle(muscle) {
+  if (selectedMuscle === muscle) {
+    selectedMuscle = null;
+    activeFilter = 'All';
+    document.querySelectorAll('.muscle-group').forEach(g => {
+      g.classList.remove('active', 'dimmed');
+    });
+    document.getElementById('emptyState').hidden = false;
+    document.getElementById('exerciseContent').hidden = true;
+    demoItems = [];
+    return;
+  }
+
+  selectedMuscle = muscle;
+  activeFilter = 'All';
+  applySelection();
+  renderExercises();
+
+  const m = MUSCLES[muscle];
+  if (window.innerWidth <= 768 && m) {
+    const needsView = m.view === 'both' ? currentView : m.view;
+    if (needsView !== currentView && m.view !== 'both') {
+      setView(m.view);
+    }
+  }
+}
+
+function applySelection() {
+  document.querySelectorAll('.muscle-group').forEach(g => {
+    g.classList.toggle('active', g.dataset.muscle === selectedMuscle);
+    g.classList.toggle('dimmed', g.dataset.muscle !== selectedMuscle);
+  });
+}
+
+function renderExercises() {
+  if (!selectedMuscle) return;
+  const m = MUSCLES[selectedMuscle];
+  const exs = EXERCISES[selectedMuscle] || [];
+
+  document.getElementById('emptyState').hidden = true;
+  document.getElementById('exerciseContent').hidden = false;
+
+  const title = document.getElementById('muscleTitle');
+  title.textContent = m.name;
+  title.style.color = m.color;
+
+  const equipTypes = ['All', ...new Set(exs.map(e => e.equip))];
+  const filtersEl = document.getElementById('filters');
+  filtersEl.innerHTML = equipTypes.map(t =>
+    `<button class="filter-chip${t === activeFilter ? ' active' : ''}" onclick="setFilter('${t}')">${t}</button>`
+  ).join('');
+
+  const filtered = activeFilter === 'All' ? exs : exs.filter(e => e.equip === activeFilter);
+  document.getElementById('exerciseCount').textContent = `${filtered.length} exercise${filtered.length !== 1 ? 's' : ''}`;
+
+  const list = document.getElementById('exerciseList');
+  list.innerHTML = filtered.map((ex, i) => {
+    const typeClass = ex.type === 'Compound' ? 'type-compound' : ex.type === 'Isolation' ? 'type-isolation' : 'type-isometric';
+    const dots = [1,2,3].map(d => `<div class="diff-dot${d <= ex.diff ? ' filled' : ''}"></div>`).join('');
+    const secondary = ex.secondary.length ? `<div class="card-muscles">Also works: <span>${ex.secondary.join(', ')}</span></div>` : '';
+    const videos = `https://www.youtube.com/results?search_query=${encodeURIComponent(ex.name + ' proper form')}`;
+    return `<div class="exercise-card" style="animation-delay:${i * 0.04}s">
+      <button class="demo" type="button" id="demo-${selectedMuscle}-${i}" data-i="${i}">
+        <canvas width="400" height="320"></canvas>
+        <span class="demo-state" aria-hidden="true"></span>
+      </button>
+      <div class="card-body">
+        <div class="card-top">
+          <h3>${ex.name}</h3>
+          <div class="diff-dots" title="${['','Beginner','Intermediate','Advanced'][ex.diff]}">${dots}</div>
+        </div>
+        <div class="card-tags">
+          <span class="tag ${typeClass}">${ex.type}</span>
+          <span class="tag">${ex.equip}</span>
+        </div>
+        <div class="card-desc">${ex.desc}</div>
+        ${secondary}
+        <a class="video-link" href="${videos}" target="_blank" rel="noopener">Watch real videos on YouTube</a>
+      </div>
+    </div>`;
+  }).join('');
+  setupDemos(list, filtered);
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  renderExercises();
+}
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+  if (v === 'both') document.querySelector('.btn-both')?.classList.add('active');
+  else if (v === 'front') document.querySelector('.btn-front')?.classList.add('active');
+  else document.querySelector('.btn-back')?.classList.add('active');
+  render();
+}
+
+// Theme change observer for SVG colors
+const themeObs = new MutationObserver(() => render());
+themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => render());
+
+render();
+</script>
