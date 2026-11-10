@@ -1,0 +1,740 @@
+<title>Muscle Wiki</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap">
+<style>
+  /* Layout: split-panel app — body diagram left, exercise panel right; stacks on mobile */
+  :root {
+    --bg: #f8f7f4;
+    --bg-card: #ffffff;
+    --bg-panel: #f0efeb;
+    --border: #e2e0db;
+    --fg: #1a1a1a;
+    --fg-secondary: #5c5c5c;
+    --fg-tertiary: #8a8a8a;
+    --accent: #2563eb;
+    --font-display: 'Space Grotesk', system-ui, sans-serif;
+    --font-body: 'Inter', system-ui, sans-serif;
+    --radius: 14px;
+    --radius-sm: 8px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #0c0c0c;
+      --bg-card: #161616;
+      --bg-panel: #111111;
+      --border: #262626;
+      --fg: #e5e5e5;
+      --fg-secondary: #a3a3a3;
+      --fg-tertiary: #6b6b6b;
+      --accent: #3b82f6;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #0c0c0c;
+    --bg-card: #161616;
+    --bg-panel: #111111;
+    --border: #262626;
+    --fg: #e5e5e5;
+    --fg-secondary: #a3a3a3;
+    --fg-tertiary: #6b6b6b;
+    --accent: #3b82f6;
+    color-scheme: dark;
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: var(--font-body);
+    margin: 0;
+    padding-left: max(16px, env(safe-area-inset-left, 0px));
+    padding-right: max(16px, env(safe-area-inset-right, 0px));
+    padding-block: 0;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .app {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  /* Header */
+  header {
+    padding: 28px 0 20px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  header h1 {
+    font-family: var(--font-display);
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.02em;
+  }
+  header p {
+    margin: 0;
+    font-size: 0.82rem;
+    color: var(--fg-tertiary);
+  }
+
+  /* Main layout */
+  .main {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    flex: 1;
+    padding-bottom: 40px;
+    align-items: start;
+  }
+
+  /* Body diagram section */
+  .diagram-section {
+    position: sticky;
+    top: env(safe-area-inset-top, 0px);
+    padding-top: 4px;
+  }
+  .view-toggle {
+    display: flex;
+    gap: 4px;
+    margin-bottom: 12px;
+    background: var(--bg-panel);
+    border-radius: var(--radius-sm);
+    padding: 3px;
+    width: fit-content;
+  }
+  .view-toggle button {
+    font-family: var(--font-body);
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--fg-tertiary);
+    transition: all 0.2s;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+  .view-toggle button.active {
+    background: var(--bg-card);
+    color: var(--fg);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  .body-container {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 420px;
+    position: relative;
+    overflow: hidden;
+  }
+  .body-svg-wrap {
+    display: flex;
+    gap: 0;
+    justify-content: center;
+    width: 100%;
+  }
+  .body-svg-wrap svg { max-height: 440px; width: auto; }
+  .body-svg-wrap svg.hidden-view { display: none; }
+
+  /* SVG muscle interactivity */
+  .muscle-group { cursor: pointer; transition: opacity 0.18s, filter 0.18s; }
+  .muscle-group:hover { opacity: 1 !important; filter: brightness(1.25); }
+  .muscle-group.active { opacity: 1 !important; filter: brightness(1.15) drop-shadow(0 0 8px var(--glow-color, #fff)); }
+  .muscle-group.dimmed { opacity: 0.3 !important; }
+
+  .body-base { pointer-events: none; }
+
+  /* Exercise panel */
+  .exercise-panel { min-width: 0; }
+  .panel-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .panel-header h2 {
+    font-family: var(--font-display);
+    font-size: 1.3rem;
+    font-weight: 700;
+    margin: 0;
+    letter-spacing: -0.01em;
+    transition: color 0.3s;
+  }
+  .panel-header .count {
+    font-size: 0.78rem;
+    color: var(--fg-tertiary);
+    font-weight: 500;
+  }
+
+  /* Filter chips */
+  .filters {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+  }
+  .filter-chip {
+    font-family: var(--font-body);
+    font-size: 0.75rem;
+    font-weight: 500;
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    cursor: pointer;
+    background: transparent;
+    color: var(--fg-secondary);
+    transition: all 0.2s;
+  }
+  .filter-chip:hover { border-color: var(--fg-tertiary); color: var(--fg); }
+  .filter-chip.active {
+    background: var(--fg);
+    color: var(--bg);
+    border-color: var(--fg);
+  }
+
+  /* Exercise cards */
+  .exercise-list { display: flex; flex-direction: column; gap: 10px; }
+  .exercise-card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 16px 18px;
+    transition: border-color 0.2s, transform 0.15s;
+    animation: cardIn 0.25s ease both;
+  }
+  .exercise-card:hover { border-color: var(--fg-tertiary); }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .card-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+  .card-top h3 {
+    font-family: var(--font-display);
+    font-size: 0.95rem;
+    font-weight: 600;
+    margin: 0;
+  }
+  .diff-dots { display: flex; gap: 3px; flex-shrink: 0; padding-top: 4px; }
+  .diff-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+  }
+  .diff-dot.filled { background: var(--accent); }
+  .card-tags {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.7rem;
+    font-weight: 500;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--bg-panel);
+    color: var(--fg-secondary);
+    letter-spacing: 0.02em;
+  }
+  .tag.type-compound { color: #16a34a; }
+  .tag.type-isolation { color: #ea580c; }
+  .tag.type-isometric { color: #7c3aed; }
+  .card-desc {
+    font-size: 0.82rem;
+    color: var(--fg-secondary);
+    line-height: 1.5;
+    margin-bottom: 8px;
+  }
+  .card-muscles {
+    font-size: 0.72rem;
+    color: var(--fg-tertiary);
+  }
+  .card-muscles span { color: var(--fg-secondary); font-weight: 500; }
+
+  /* Empty state */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 60px 20px;
+    min-height: 300px;
+  }
+  .empty-state .icon {
+    font-size: 3rem;
+    margin-bottom: 16px;
+    opacity: 0.15;
+    filter: grayscale(1);
+  }
+  .empty-state p {
+    color: var(--fg-tertiary);
+    font-size: 0.88rem;
+    margin: 0;
+    max-width: 240px;
+    line-height: 1.5;
+  }
+
+  /* Footer */
+  footer {
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    font-size: 0.75rem;
+    color: var(--fg-tertiary);
+    text-align: center;
+  }
+  footer a { color: var(--fg-secondary); text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main { grid-template-columns: 1fr; }
+    .diagram-section { position: static; }
+    .body-container { min-height: 340px; padding: 16px; }
+    .body-svg-wrap svg { max-height: 340px; }
+    header { padding: 20px 0 16px; }
+    header h1 { font-size: 1.35rem; }
+  }
+  @media (min-width: 769px) {
+    .view-toggle .btn-front,
+    .view-toggle .btn-back { display: none; }
+    .body-svg-wrap svg.hidden-view { display: block !important; }
+  }
+  @media (max-width: 768px) {
+    .view-toggle .btn-both { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .exercise-card { animation: none; }
+    .muscle-group { transition: none; }
+  }
+</style>
+
+<div class="app">
+  <header>
+    <h1>Muscle Wiki</h1>
+    <p>Click a muscle group to explore exercises</p>
+  </header>
+
+  <div class="main">
+    <div class="diagram-section">
+      <div class="view-toggle">
+        <button class="btn-both active" onclick="setView('both')">Both</button>
+        <button class="btn-front active" onclick="setView('front')">Front</button>
+        <button class="btn-back" onclick="setView('back')">Back</button>
+      </div>
+      <div class="body-container">
+        <div class="body-svg-wrap" id="bodyWrap"></div>
+      </div>
+    </div>
+
+    <div class="exercise-panel" id="exercisePanel">
+      <div class="empty-state" id="emptyState">
+        <div class="icon">&#x1f4aa;</div>
+        <p>Select a muscle group from the diagram to see exercises</p>
+      </div>
+      <div id="exerciseContent" hidden>
+        <div class="panel-header">
+          <h2 id="muscleTitle">Chest</h2>
+          <span class="count" id="exerciseCount"></span>
+        </div>
+        <div class="filters" id="filters"></div>
+        <div class="exercise-list" id="exerciseList"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    Inspired by <a href="https://musclewiki.com" target="_blank" rel="noopener">musclewiki.com</a>
+  </footer>
+</div>
+
+<script>
+const MUSCLES = {
+  chest:      { name: 'Chest',       color: '#3b82f6', view: 'front' },
+  shoulders:  { name: 'Shoulders',   color: '#ef4444', view: 'both'  },
+  biceps:     { name: 'Biceps',      color: '#f59e0b', view: 'front' },
+  triceps:    { name: 'Triceps',     color: '#f97316', view: 'back'  },
+  forearms:   { name: 'Forearms',    color: '#84cc16', view: 'both'  },
+  abs:        { name: 'Abs',         color: '#a855f7', view: 'front' },
+  obliques:   { name: 'Obliques',    color: '#ec4899', view: 'front' },
+  lats:       { name: 'Lats',        color: '#6366f1', view: 'back'  },
+  traps:      { name: 'Traps',       color: '#d946ef', view: 'back'  },
+  lowerback:  { name: 'Lower Back',  color: '#fb923c', view: 'back'  },
+  glutes:     { name: 'Glutes',      color: '#f43f5e', view: 'back'  },
+  quads:      { name: 'Quads',       color: '#06b6d4', view: 'front' },
+  hamstrings: { name: 'Hamstrings',  color: '#14b8a6', view: 'back'  },
+  calves:     { name: 'Calves',      color: '#22c55e', view: 'both'  }
+};
+
+const EXERCISES = {
+  chest: [
+    { name: 'Barbell Bench Press', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Lie on a flat bench, grip the bar slightly wider than shoulder-width, lower to chest and press up.', secondary: ['Triceps', 'Shoulders'] },
+    { name: 'Push-ups', type: 'Compound', equip: 'Bodyweight', diff: 1, desc: 'Hands shoulder-width apart, lower your body until your chest nearly touches the floor, then push back up.', secondary: ['Triceps', 'Core'] },
+    { name: 'Dumbbell Flyes', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Lie flat holding dumbbells above chest, arms slightly bent. Open arms wide, then squeeze back together.', secondary: ['Shoulders'] },
+    { name: 'Incline Dumbbell Press', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Set bench to 30-45 degrees. Press dumbbells from shoulder height to full extension above upper chest.', secondary: ['Shoulders', 'Triceps'] },
+    { name: 'Cable Crossover', type: 'Isolation', equip: 'Cable', diff: 2, desc: 'Stand between cable stations, bring handles together in front of chest in a hugging motion.', secondary: ['Shoulders'] }
+  ],
+  shoulders: [
+    { name: 'Overhead Press', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Press the barbell from shoulder level to overhead lockout. Keep core braced throughout.', secondary: ['Triceps', 'Core'] },
+    { name: 'Lateral Raises', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Raise dumbbells out to your sides until arms are parallel with the floor. Control the descent.', secondary: [] },
+    { name: 'Face Pulls', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Pull the rope attachment toward your face, squeezing shoulder blades together at the end.', secondary: ['Traps'] },
+    { name: 'Arnold Press', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Start with palms facing you, rotate wrists outward as you press the dumbbells overhead.', secondary: ['Triceps'] },
+    { name: 'Reverse Pec Deck', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Sit facing the pad, push handles back by squeezing your rear delts.', secondary: ['Traps'] }
+  ],
+  biceps: [
+    { name: 'Barbell Curl', type: 'Isolation', equip: 'Barbell', diff: 1, desc: 'Grip the barbell underhand at shoulder width. Curl the weight up without swinging your body.', secondary: ['Forearms'] },
+    { name: 'Hammer Curl', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Curl dumbbells with a neutral grip (palms facing each other). Targets the brachialis and forearms.', secondary: ['Forearms'] },
+    { name: 'Chin-ups', type: 'Compound', equip: 'Bodyweight', diff: 2, desc: 'Grip the bar underhand, pull yourself up until your chin clears the bar.', secondary: ['Lats', 'Core'] },
+    { name: 'Incline Dumbbell Curl', type: 'Isolation', equip: 'Dumbbell', diff: 2, desc: 'Sit on an incline bench, let arms hang, then curl. The stretch at the bottom increases range of motion.', secondary: ['Forearms'] }
+  ],
+  triceps: [
+    { name: 'Tricep Dips', type: 'Compound', equip: 'Bodyweight', diff: 2, desc: 'Support yourself on parallel bars, lower until upper arms are parallel to the floor, then press up.', secondary: ['Chest', 'Shoulders'] },
+    { name: 'Tricep Pushdown', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Press the cable bar or rope down until arms are fully extended. Keep elbows pinned to your sides.', secondary: [] },
+    { name: 'Skull Crushers', type: 'Isolation', equip: 'Barbell', diff: 2, desc: 'Lie flat, lower the bar toward your forehead by bending only at the elbows, then extend back up.', secondary: [] },
+    { name: 'Overhead Tricep Extension', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Hold a dumbbell overhead with both hands, lower it behind your head, then extend back up.', secondary: [] }
+  ],
+  forearms: [
+    { name: 'Wrist Curls', type: 'Isolation', equip: 'Dumbbell', diff: 1, desc: 'Rest forearms on your thighs, palms up, and curl the weight using only your wrists.', secondary: [] },
+    { name: 'Reverse Curls', type: 'Isolation', equip: 'Barbell', diff: 1, desc: 'Curl a barbell with an overhand grip. Strengthens the brachioradialis and wrist extensors.', secondary: ['Biceps'] },
+    { name: "Farmer's Walk", type: 'Compound', equip: 'Dumbbell', diff: 1, desc: 'Hold heavy dumbbells at your sides and walk for distance or time. Builds grip and overall stability.', secondary: ['Core', 'Traps'] }
+  ],
+  abs: [
+    { name: 'Plank', type: 'Isometric', equip: 'Bodyweight', diff: 1, desc: 'Hold a push-up position on your forearms, keeping your body in a straight line from head to heels.', secondary: ['Core'] },
+    { name: 'Hanging Leg Raises', type: 'Isolation', equip: 'Bodyweight', diff: 2, desc: 'Hang from a bar and raise your legs until they are parallel with the floor. Control the lowering.', secondary: ['Hip Flexors'] },
+    { name: 'Cable Crunches', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Kneel below a cable with rope attachment, crunch down bringing elbows toward knees.', secondary: [] },
+    { name: 'Ab Wheel Rollout', type: 'Compound', equip: 'Bodyweight', diff: 3, desc: 'Kneel and roll the wheel forward, extending your body, then pull back using your abs.', secondary: ['Shoulders', 'Lats'] }
+  ],
+  obliques: [
+    { name: 'Russian Twists', type: 'Isolation', equip: 'Bodyweight', diff: 1, desc: 'Sit with knees bent, lean back slightly, and rotate your torso side to side.', secondary: ['Abs'] },
+    { name: 'Side Plank', type: 'Isometric', equip: 'Bodyweight', diff: 1, desc: 'Support your body on one forearm and the side of one foot, keeping hips elevated.', secondary: ['Core'] },
+    { name: 'Woodchops', type: 'Isolation', equip: 'Cable', diff: 2, desc: 'Pull a cable from high to low (or low to high) in a diagonal chopping motion across your body.', secondary: ['Core', 'Shoulders'] }
+  ],
+  lats: [
+    { name: 'Pull-ups', type: 'Compound', equip: 'Bodyweight', diff: 2, desc: 'Grip the bar overhand, pull yourself up until your chin clears the bar. The gold standard for back width.', secondary: ['Biceps', 'Core'] },
+    { name: 'Barbell Row', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Hinge at the hips, pull the barbell toward your lower chest. Keep your back flat throughout.', secondary: ['Biceps', 'Lower Back'] },
+    { name: 'Lat Pulldown', type: 'Compound', equip: 'Cable', diff: 1, desc: 'Sit at the machine, pull the bar down to your upper chest, squeezing your lats at the bottom.', secondary: ['Biceps'] },
+    { name: 'Seated Cable Row', type: 'Compound', equip: 'Cable', diff: 1, desc: 'Sit upright, pull the handle toward your torso. Focus on retracting your shoulder blades.', secondary: ['Biceps', 'Traps'] }
+  ],
+  traps: [
+    { name: 'Barbell Shrugs', type: 'Isolation', equip: 'Barbell', diff: 1, desc: 'Hold a barbell at arm\'s length, shrug your shoulders straight up toward your ears.', secondary: [] },
+    { name: 'Face Pulls', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Pull the rope toward your face while externally rotating your shoulders. Great for posture.', secondary: ['Shoulders'] },
+    { name: 'Rack Pulls', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Deadlift from knee height in a power rack. Overloads the top of the pull for trap development.', secondary: ['Lower Back', 'Glutes'] }
+  ],
+  lowerback: [
+    { name: 'Hyperextensions', type: 'Isolation', equip: 'Bodyweight', diff: 1, desc: 'Position yourself in a back extension bench. Lower your torso and raise back to neutral.', secondary: ['Glutes', 'Hamstrings'] },
+    { name: 'Good Mornings', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'With a barbell on your shoulders, hinge at the hips until your torso is near-parallel, then stand.', secondary: ['Hamstrings', 'Glutes'] },
+    { name: 'Superman Hold', type: 'Isometric', equip: 'Bodyweight', diff: 1, desc: 'Lie face down, simultaneously raise your arms and legs off the floor. Hold briefly at the top.', secondary: ['Glutes'] }
+  ],
+  glutes: [
+    { name: 'Hip Thrusts', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Sit with upper back against a bench, barbell over hips. Drive hips up to full extension.', secondary: ['Hamstrings', 'Core'] },
+    { name: 'Bulgarian Split Squats', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Rear foot elevated on a bench, lower into a single-leg squat. Excellent for glute activation.', secondary: ['Quads', 'Core'] },
+    { name: 'Glute Bridge', type: 'Isolation', equip: 'Bodyweight', diff: 1, desc: 'Lie on your back, feet flat, drive hips up squeezing glutes at the top.', secondary: ['Hamstrings'] },
+    { name: 'Cable Kickbacks', type: 'Isolation', equip: 'Cable', diff: 1, desc: 'Attach an ankle strap, kick one leg straight back against the cable resistance.', secondary: ['Hamstrings'] }
+  ],
+  quads: [
+    { name: 'Barbell Squat', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Bar on upper back, squat down until thighs are parallel or below, then stand. The king of leg exercises.', secondary: ['Glutes', 'Core'] },
+    { name: 'Leg Press', type: 'Compound', equip: 'Machine', diff: 1, desc: 'Sit in the machine, push the platform away by extending your legs. Feet shoulder-width apart.', secondary: ['Glutes'] },
+    { name: 'Walking Lunges', type: 'Compound', equip: 'Dumbbell', diff: 1, desc: 'Step forward into a lunge, then bring the rear foot forward into the next step.', secondary: ['Glutes', 'Hamstrings'] },
+    { name: 'Leg Extension', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Sit in the machine and extend your legs until straight. Focus on squeezing the quads at the top.', secondary: [] }
+  ],
+  hamstrings: [
+    { name: 'Romanian Deadlift', type: 'Compound', equip: 'Barbell', diff: 2, desc: 'Hinge at the hips with soft knees, lower the bar along your legs, feel the stretch, then drive hips forward.', secondary: ['Glutes', 'Lower Back'] },
+    { name: 'Lying Leg Curl', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Lie face down, curl the pad toward your glutes by bending at the knees.', secondary: [] },
+    { name: 'Nordic Curl', type: 'Isolation', equip: 'Bodyweight', diff: 3, desc: 'Kneel with feet anchored, slowly lower your body forward using only hamstring strength.', secondary: [] },
+    { name: 'Stiff-Leg Deadlift', type: 'Compound', equip: 'Dumbbell', diff: 2, desc: 'Similar to Romanian deadlift but with straighter legs for a deeper hamstring stretch.', secondary: ['Glutes', 'Lower Back'] }
+  ],
+  calves: [
+    { name: 'Standing Calf Raises', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Stand on a platform edge, raise up onto your toes, then lower below the platform for full stretch.', secondary: [] },
+    { name: 'Seated Calf Raises', type: 'Isolation', equip: 'Machine', diff: 1, desc: 'Sit with the pad on your thighs, raise and lower your heels. Targets the soleus.', secondary: [] },
+    { name: 'Jump Rope', type: 'Compound', equip: 'Bodyweight', diff: 1, desc: 'Skip rope at a steady pace. Builds calf endurance and coordination while burning calories.', secondary: ['Core'] }
+  ]
+};
+
+// SVG body shapes
+function bodyShape(id, fill, stroke) {
+  return `<g class="body-base">
+    <circle cx="0" cy="-195" r="22" fill="${fill}" stroke="${stroke}" stroke-width="1.5"/>
+    <rect x="-8" y="-175" width="16" height="14" rx="4" fill="${fill}" stroke="${stroke}"/>
+    <rect x="-48" y="-161" width="96" height="100" rx="8" fill="${fill}" stroke="${stroke}"/>
+    <rect x="-72" y="-148" width="20" height="55" rx="8" fill="${fill}" stroke="${stroke}"/>
+    <rect x="52" y="-148" width="20" height="55" rx="8" fill="${fill}" stroke="${stroke}"/>
+    <rect x="-70" y="-95" width="18" height="52" rx="6" fill="${fill}" stroke="${stroke}"/>
+    <rect x="52" y="-95" width="18" height="52" rx="6" fill="${fill}" stroke="${stroke}"/>
+    <rect x="-48" y="-62" width="96" height="22" rx="10" fill="${fill}" stroke="${stroke}"/>
+    <rect x="-42" y="-42" width="34" height="78" rx="12" fill="${fill}" stroke="${stroke}"/>
+    <rect x="8" y="-42" width="34" height="78" rx="12" fill="${fill}" stroke="${stroke}"/>
+    <rect x="-38" y="38" width="28" height="60" rx="10" fill="${fill}" stroke="${stroke}"/>
+    <rect x="10" y="38" width="28" height="60" rx="10" fill="${fill}" stroke="${stroke}"/>
+    <circle cx="-62" cy="-38" r="8" fill="${fill}" stroke="${stroke}"/>
+    <circle cx="62" cy="-38" r="8" fill="${fill}" stroke="${stroke}"/>
+    <ellipse cx="-24" cy="105" rx="14" ry="7" fill="${fill}" stroke="${stroke}"/>
+    <ellipse cx="24" cy="105" rx="14" ry="7" fill="${fill}" stroke="${stroke}"/>
+  </g>`;
+}
+
+function muscleShapes(view) {
+  if (view === 'front') return `
+    <g class="muscle-group" data-muscle="shoulders" style="--glow-color:${MUSCLES.shoulders.color}">
+      <ellipse cx="-52" cy="-155" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
+      <ellipse cx="52" cy="-155" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="chest" style="--glow-color:${MUSCLES.chest.color}">
+      <rect x="-42" y="-161" width="84" height="48" rx="8" fill="${MUSCLES.chest.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="biceps" style="--glow-color:${MUSCLES.biceps.color}">
+      <rect x="-72" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.biceps.color}" opacity="0.85"/>
+      <rect x="52" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.biceps.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="forearms" style="--glow-color:${MUSCLES.forearms.color}">
+      <rect x="-70" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
+      <rect x="52" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="obliques" style="--glow-color:${MUSCLES.obliques.color}">
+      <rect x="-42" y="-110" width="14" height="42" rx="4" fill="${MUSCLES.obliques.color}" opacity="0.75"/>
+      <rect x="28" y="-110" width="14" height="42" rx="4" fill="${MUSCLES.obliques.color}" opacity="0.75"/>
+    </g>
+    <g class="muscle-group" data-muscle="abs" style="--glow-color:${MUSCLES.abs.color}">
+      <rect x="-28" y="-110" width="56" height="48" rx="6" fill="${MUSCLES.abs.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="quads" style="--glow-color:${MUSCLES.quads.color}">
+      <rect x="-42" y="-42" width="34" height="72" rx="12" fill="${MUSCLES.quads.color}" opacity="0.85"/>
+      <rect x="8" y="-42" width="34" height="72" rx="12" fill="${MUSCLES.quads.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="calves" style="--glow-color:${MUSCLES.calves.color}">
+      <rect x="-38" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
+      <rect x="10" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
+    </g>`;
+
+  return `
+    <g class="muscle-group" data-muscle="traps" style="--glow-color:${MUSCLES.traps.color}">
+      <path d="M-12,-175 L12,-175 L48,-155 L48,-145 L-48,-145 L-48,-155 Z" fill="${MUSCLES.traps.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="shoulders" style="--glow-color:${MUSCLES.shoulders.color}">
+      <ellipse cx="-52" cy="-148" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
+      <ellipse cx="52" cy="-148" rx="16" ry="13" fill="${MUSCLES.shoulders.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="lats" style="--glow-color:${MUSCLES.lats.color}">
+      <rect x="-48" y="-148" width="28" height="58" rx="4" fill="${MUSCLES.lats.color}" opacity="0.85"/>
+      <rect x="20" y="-148" width="28" height="58" rx="4" fill="${MUSCLES.lats.color}" opacity="0.85"/>
+    </g>
+    <g class="body-base"><rect x="-20" y="-148" width="40" height="40" rx="4" fill="${fill}"/></g>
+    <g class="muscle-group" data-muscle="lowerback" style="--glow-color:${MUSCLES.lowerback.color}">
+      <rect x="-30" y="-95" width="60" height="35" rx="6" fill="${MUSCLES.lowerback.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="triceps" style="--glow-color:${MUSCLES.triceps.color}">
+      <rect x="-72" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.triceps.color}" opacity="0.85"/>
+      <rect x="52" y="-148" width="20" height="50" rx="8" fill="${MUSCLES.triceps.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="forearms" style="--glow-color:${MUSCLES.forearms.color}">
+      <rect x="-70" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
+      <rect x="52" y="-95" width="18" height="48" rx="6" fill="${MUSCLES.forearms.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="glutes" style="--glow-color:${MUSCLES.glutes.color}">
+      <ellipse cx="-22" cy="-48" rx="20" ry="16" fill="${MUSCLES.glutes.color}" opacity="0.85"/>
+      <ellipse cx="22" cy="-48" rx="20" ry="16" fill="${MUSCLES.glutes.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="hamstrings" style="--glow-color:${MUSCLES.hamstrings.color}">
+      <rect x="-42" y="-32" width="34" height="68" rx="12" fill="${MUSCLES.hamstrings.color}" opacity="0.85"/>
+      <rect x="8" y="-32" width="34" height="68" rx="12" fill="${MUSCLES.hamstrings.color}" opacity="0.85"/>
+    </g>
+    <g class="muscle-group" data-muscle="calves" style="--glow-color:${MUSCLES.calves.color}">
+      <rect x="-38" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
+      <rect x="10" y="38" width="28" height="55" rx="10" fill="${MUSCLES.calves.color}" opacity="0.85"/>
+    </g>`;
+}
+
+function buildLabel(text, color, tx, ty, lx, ly) {
+  return `<g font-family="Inter, sans-serif" font-size="10" font-weight="600">
+    <text x="${tx}" y="${ty}" text-anchor="${tx < 0 ? 'end' : 'start'}" fill="${color}">${text}</text>
+    <line x1="${tx < 0 ? tx+4 : tx-4}" y1="${ty-2}" x2="${lx}" y2="${ly}" stroke="${color}" stroke-width="0.7" opacity="0.4"/>
+    <circle cx="${lx}" cy="${ly}" r="1.8" fill="${color}" opacity="0.4"/>
+  </g>`;
+}
+
+function buildSVG(view) {
+  const cs = getComputedStyle(document.documentElement);
+  const fill = cs.getPropertyValue('--bg-card').trim() || '#161616';
+  const stroke = cs.getPropertyValue('--border').trim() || '#262626';
+
+  const labels = view === 'front' ? [
+    buildLabel('Shoulders', MUSCLES.shoulders.color, -85, -152, -52, -155),
+    buildLabel('Chest',     MUSCLES.chest.color,     -85, -135, -42, -137),
+    buildLabel('Biceps',    MUSCLES.biceps.color,    -85, -118, -62, -123),
+    buildLabel('Forearms',  MUSCLES.forearms.color,  -85, -72,  -61, -71),
+    buildLabel('Abs',       MUSCLES.abs.color,        85, -86,   28, -86),
+    buildLabel('Obliques',  MUSCLES.obliques.color,   85, -102,  42, -100),
+    buildLabel('Quads',     MUSCLES.quads.color,      85, -6,    42, -6),
+    buildLabel('Calves',    MUSCLES.calves.color,     85,  65,   38,  65),
+  ] : [
+    buildLabel('Traps',      MUSCLES.traps.color,      -85, -163, -30, -160),
+    buildLabel('Triceps',    MUSCLES.triceps.color,     -85, -122, -62, -123),
+    buildLabel('Lats',       MUSCLES.lats.color,        -85, -143, -38, -130),
+    buildLabel('Lower Back', MUSCLES.lowerback.color,   -85, -80,  -30, -78),
+    buildLabel('Glutes',     MUSCLES.glutes.color,       85, -48,   42, -48),
+    buildLabel('Hamstrings', MUSCLES.hamstrings.color,   85,  2,    42,  2),
+    buildLabel('Calves',     MUSCLES.calves.color,       85,  65,   38,  65),
+  ];
+
+  const viewLabel = view === 'front' ? 'FRONT' : 'BACK';
+
+  return `<svg viewBox="-150 -222 300 355" xmlns="http://www.w3.org/2000/svg" id="svg-${view}">
+    <text x="0" y="-207" text-anchor="middle" fill="${cs.getPropertyValue('--fg-tertiary').trim() || '#6b6b6b'}" font-family="Space Grotesk, sans-serif" font-size="9" font-weight="600" letter-spacing="2">${viewLabel}</text>
+    ${bodyShape(view, fill, stroke)}
+    ${muscleShapes(view)}
+    ${labels.join('')}
+  </svg>`;
+}
+
+// State
+let selectedMuscle = null;
+let activeFilter = 'All';
+let currentView = window.innerWidth <= 768 ? 'front' : 'both';
+
+function render() {
+  const wrap = document.getElementById('bodyWrap');
+  wrap.innerHTML = buildSVG('front') + buildSVG('back');
+
+  if (currentView === 'front') {
+    document.getElementById('svg-back')?.classList.add('hidden-view');
+  } else if (currentView === 'back') {
+    document.getElementById('svg-front')?.classList.add('hidden-view');
+  }
+
+  wrap.querySelectorAll('.muscle-group').forEach(g => {
+    g.addEventListener('click', () => selectMuscle(g.dataset.muscle));
+    g.addEventListener('mouseenter', () => {
+      if (!selectedMuscle) highlightMuscle(g.dataset.muscle, true);
+    });
+    g.addEventListener('mouseleave', () => {
+      if (!selectedMuscle) highlightMuscle(null, false);
+    });
+  });
+
+  if (selectedMuscle) applySelection();
+}
+
+function highlightMuscle(muscle, hover) {
+  document.querySelectorAll('.muscle-group').forEach(g => {
+    if (hover && muscle) {
+      g.classList.toggle('dimmed', g.dataset.muscle !== muscle);
+    } else {
+      g.classList.remove('dimmed');
+    }
+  });
+}
+
+function selectMuscle(muscle) {
+  if (selectedMuscle === muscle) {
+    selectedMuscle = null;
+    activeFilter = 'All';
+    document.querySelectorAll('.muscle-group').forEach(g => {
+      g.classList.remove('active', 'dimmed');
+    });
+    document.getElementById('emptyState').hidden = false;
+    document.getElementById('exerciseContent').hidden = true;
+    return;
+  }
+
+  selectedMuscle = muscle;
+  activeFilter = 'All';
+  applySelection();
+  renderExercises();
+
+  const m = MUSCLES[muscle];
+  if (window.innerWidth <= 768 && m) {
+    const needsView = m.view === 'both' ? currentView : m.view;
+    if (needsView !== currentView && m.view !== 'both') {
+      setView(m.view);
+    }
+  }
+}
+
+function applySelection() {
+  document.querySelectorAll('.muscle-group').forEach(g => {
+    g.classList.toggle('active', g.dataset.muscle === selectedMuscle);
+    g.classList.toggle('dimmed', g.dataset.muscle !== selectedMuscle);
+  });
+}
+
+function renderExercises() {
+  if (!selectedMuscle) return;
+  const m = MUSCLES[selectedMuscle];
+  const exs = EXERCISES[selectedMuscle] || [];
+
+  document.getElementById('emptyState').hidden = true;
+  document.getElementById('exerciseContent').hidden = false;
+
+  const title = document.getElementById('muscleTitle');
+  title.textContent = m.name;
+  title.style.color = m.color;
+
+  const equipTypes = ['All', ...new Set(exs.map(e => e.equip))];
+  const filtersEl = document.getElementById('filters');
+  filtersEl.innerHTML = equipTypes.map(t =>
+    `<button class="filter-chip${t === activeFilter ? ' active' : ''}" onclick="setFilter('${t}')">${t}</button>`
+  ).join('');
+
+  const filtered = activeFilter === 'All' ? exs : exs.filter(e => e.equip === activeFilter);
+  document.getElementById('exerciseCount').textContent = `${filtered.length} exercise${filtered.length !== 1 ? 's' : ''}`;
+
+  const list = document.getElementById('exerciseList');
+  list.innerHTML = filtered.map((ex, i) => {
+    const typeClass = ex.type === 'Compound' ? 'type-compound' : ex.type === 'Isolation' ? 'type-isolation' : 'type-isometric';
+    const dots = [1,2,3].map(d => `<div class="diff-dot${d <= ex.diff ? ' filled' : ''}"></div>`).join('');
+    const secondary = ex.secondary.length ? `<div class="card-muscles">Also works: <span>${ex.secondary.join(', ')}</span></div>` : '';
+    return `<div class="exercise-card" style="animation-delay:${i * 0.04}s">
+      <div class="card-top">
+        <h3>${ex.name}</h3>
+        <div class="diff-dots" title="${['','Beginner','Intermediate','Advanced'][ex.diff]}">${dots}</div>
+      </div>
+      <div class="card-tags">
+        <span class="tag ${typeClass}">${ex.type}</span>
+        <span class="tag">${ex.equip}</span>
+      </div>
+      <div class="card-desc">${ex.desc}</div>
+      ${secondary}
+    </div>`;
+  }).join('');
+}
+
+function setFilter(f) {
+  activeFilter = f;
+  renderExercises();
+}
+
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+  if (v === 'both') document.querySelector('.btn-both')?.classList.add('active');
+  else if (v === 'front') document.querySelector('.btn-front')?.classList.add('active');
+  else document.querySelector('.btn-back')?.classList.add('active');
+  render();
+}
+
+// Theme change observer for SVG colors
+const themeObs = new MutationObserver(() => render());
+themeObs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => render());
+
+render();
+</script>
